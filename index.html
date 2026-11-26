@@ -1,0 +1,1994 @@
+<!DOCTYPE html>
+<html lang="am">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f4c81" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>STG 4th Ed. Clinical CDS App</title>
+  <style>
+    * { box-sizing: border-box; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; background: #eef3f8; color: #111827; padding: 12px; }
+    .app { max-width: 720px; margin: 0 auto; background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 6px 20px rgba(15, 76, 129, 0.08); }
+    .top-bar { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap; }
+    h1 { font-size: 1.18rem; margin: 0 0 4px; color: #0f4c81; }
+    .sub { font-size: 0.83rem; color: #4b5563; margin-bottom: 12px; }
+    .pill-usage { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; font-size: 0.78rem; font-weight: 700; padding: 4px 10px; border-radius: 999px; }
+    .nav-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+    .tab-btn { padding: 7px 11px; border-radius: 8px; border: 1px solid #cbd5e1; background: #f8fafc; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .tab-btn.active { background: #0f4c81; color: #fff; border-color: #0f4c81; }
+    .view { display: none; }
+    .view.active { display: block; }
+    .card { border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; margin-bottom: 12px; background: #fafafa; }
+    .card h3 { margin: 12px 0 6px; font-size: 0.95rem; color: #1f2937; }
+    .card h3:first-child { margin-top: 0; }
+    label { display: block; font-size: 0.82rem; font-weight: 600; margin: 6px 0 3px; }
+    input, select, textarea { width: 100%; padding: 9px 10px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 0.92rem; background: #fff; }
+    textarea { min-height: 65px; resize: vertical; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .btn { width: 100%; padding: 12px; border: none; border-radius: 9px; font-size: 0.96rem; font-weight: 700; cursor: pointer; background: #0f4c81; color: #fff; margin-top: 8px; touch-action: manipulation; }
+    .btn-secondary { background: #e5e7eb; color: #111827; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
+    .chip { padding: 8px 12px; border-radius: 20px; border: 1px solid #94a3b8; background: #fff; font-size: 0.85rem; cursor: pointer; touch-action: manipulation; }
+    .chip.active { background: #0f4c81; color: #fff; border-color: #0f4c81; }
+    .step { display: none; }
+    .step.active { display: block; }
+    .badge { display: inline-block; background: #e0f2fe; color: #0369a1; font-size: 0.75rem; font-weight: 700; padding: 3px 8px; border-radius: 6px; margin-bottom: 8px; }
+    .plan-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .plan-box { border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px; background: #fff; }
+    ul { margin: 6px 0 12px; padding-left: 18px; }
+    li { margin-bottom: 6px; font-size: 0.9rem; line-height: 1.4; }
+    .note-warn { font-size: 0.78rem; color: #6b7280; margin-top: 10px; }
+    .cc-tag { font-size: 0.82rem; color: #0369a1; background: #f0f9ff; border: 1px solid #bae6fd; padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; }
+    .alert-box { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; border-radius: 9px; padding: 10px; margin-bottom: 10px; font-size: 0.86rem; }
+    .teach-box { background: #f0f9ff; border: 1px solid #bae6fd; color: #0c4a6e; border-radius: 9px; padding: 10px; margin-bottom: 10px; font-size: 0.88rem; }
+    .lock-banner { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; border-radius: 9px; padding: 10px; margin-bottom: 10px; font-size: 0.85rem; }
+    .export-box { background: #111827; color: #f9fafb; border-radius: 8px; padding: 10px; font-size: 0.78rem; white-space: pre-wrap; word-break: break-word; margin-top: 8px; }
+    .copy-status { font-size: 0.84rem; color: #065f46; font-weight: 700; margin-top: 6px; }
+    @media print {
+      body { background: #fff; padding: 0; }
+      .nav-tabs, .top-bar .pill-usage, #step4 .btn, .copy-status { display: none !important; }
+      .app { box-shadow: none; max-width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="top-bar">
+      <div>
+        <h1>STG 4th Ed. Clinical CDS App</h1>
+        <div class="sub">Web + App Ready • Ethiopian STG 4th Edition Teaching & Clinical Decision Support</div>
+      </div>
+      <div id="usagePill" class="pill-usage">Cases Completed: 0</div>
+    </div>
+
+    <div class="nav-tabs">
+      <button type="button" class="tab-btn active" onclick="switchView('clinicalView', this)">Clinical Workflow</button>
+      <button type="button" class="tab-btn" onclick="switchView('subView', this)">Usage & Billing</button>
+      <button type="button" class="tab-btn" onclick="switchView('adminView', this)">Owner Update</button>
+    </div>
+
+    <div id="clinicalView" class="view active">
+      <div id="step1" class="step active">
+        <span class="badge">Step 1 of 4 • Patient, Vitals & Chief Complaint</span>
+
+        <div class="card">
+          <h3>1. Patient Demographics & Ward (Optional)</h3>
+          <div class="row">
+            <div><label for="age">Age (Optional)</label><input id="age" type="text" placeholder="e.g. 26 or 4 months" /></div>
+            <div><label for="weight">Weight kg (Optional)</label><input id="weight" type="number" step="0.1" placeholder="e.g. 55 or 12" /></div>
+          </div>
+          <div class="row">
+            <div>
+              <label for="sex">Sex (Optional)</label>
+              <select id="sex">
+                <option value="">Not specified</option>
+                <option value="Female">Female</option>
+                <option value="Male">Male</option>
+              </select>
+            </div>
+            <div>
+              <label for="ward">Ward / Section (Optional)</label>
+              <select id="ward">
+                <option value="">Auto / All Wards</option>
+                <option value="pediatrics">Pediatrics & Neonatal</option>
+                <option value="gynecology">Gynecology & Obstetrics</option>
+                <option value="surgical">Surgical & Trauma</option>
+                <option value="medical">Medical & Infectious / Neuro / Metabolic</option>
+                <option value="oral_dental">11. Oral & Dental</option>
+                <option value="psychiatry">Psychiatry</option>
+                <option value="palliative">20. Palliative Care</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>2. Vital Signs</h3>
+          <div class="row">
+            <div><label for="bp">BP (mmHg)</label><input id="bp" type="text" placeholder="e.g. 110/70" /></div>
+            <div><label for="pr">PR</label><input id="pr" type="text" placeholder="88" /></div>
+          </div>
+          <div class="row">
+            <div><label for="rr">RR</label><input id="rr" type="text" placeholder="16" /></div>
+            <div><label for="temp">Temp (°C)</label><input id="temp" type="text" placeholder="36.8" /></div>
+          </div>
+          <div><label for="spo2">SpO2 (%)</label><input id="spo2" type="text" placeholder="96" /></div>
+        </div>
+
+        <div class="card">
+          <h3>3. Chief Complaint & Duration</h3>
+          <label for="cc">ዋና የህመም ቅሬታ (Chief Complaint)</label>
+          <textarea id="cc" placeholder="ለምሳሌ፡ Malaria, DKA, Abortion, SAM, AGE, Pneumonia, Amebiasis, Asthma, Heart Failure, Hypertension, PUD, Meningitis, Anemia, PID, Burns, Acute Abdomen, Foreign Body Aspiration, Dental Caries"></textarea>
+          <label for="ccDuration">የህመሙ ቆይታ (Duration)</label>
+          <input id="ccDuration" type="text" placeholder="ለምሳሌ፡ 2 days, 1 week" />
+        </div>
+
+        <button type="button" class="btn" id="step1NextBtn" onclick="goStep2(); return false;">Enter →</button>
+      </div>
+
+      <div id="step2" class="step">
+        <span class="badge">Step 2 of 4 • Characterizing & Associated Symptoms</span>
+        <div class="card">
+          <div id="ccContextBanner" class="cc-tag"></div>
+          <h3>Chief Complaint-ን የሚለዩ (Characterize የሚያደርጉ) ምልክቶች ምረጥ (Click)</h3>
+          <div id="symptomChips" class="chips"></div>
+        </div>
+        <button type="button" class="btn" onclick="goStep3(); return false;">Enter →</button>
+        <button type="button" class="btn btn-secondary" onclick="showStep('step1'); return false;">← Back</button>
+      </div>
+
+      <div id="step3" class="step">
+        <span class="badge">Step 3 of 4 • Related Investigations (Multi-Select Enabled)</span>
+        <div class="card">
+          <div id="invContextBanner" class="cc-tag"></div>
+          <h3>ከዚህ Chief Complaint እና ምልክቶች ጋር የተያያዙ ምርመራዎች</h3>
+          <p style="font-size:0.8rem;color:#4b5563;margin:0;">በእያንዳንዱ ምርመራ ውስጥ ሁለትና ከዚያ በላይ ውጤቶችን (chips) በአንድ ጊዜ መምረጥ ይችላሉ፤ ውጤት ያስገቡ ወይም በ <code>None</code> ይተዉ። ተጨማሪ ነጠላ ምርመራ ቢያስፈልግዎ ከታች ይጨምሩ።</p>
+        </div>
+        <div id="investigationList"></div>
+        <div class="card">
+          <h3>ተጨማሪ ነጠላ ምርመራ ጨምር (Optional)</h3>
+          <select id="extraInvSelect">
+            <option value="">-- Select additional single investigation --</option>
+          </select>
+          <button type="button" class="btn btn-secondary" onclick="addExtraInvestigation(); return false;">+ Add Investigation</button>
+        </div>
+        <button type="button" class="btn" onclick="goStep4(); return false;">Enter →</button>
+        <button type="button" class="btn btn-secondary" onclick="showStep('step2'); return false;">← Back</button>
+      </div>
+
+      <div id="step4" class="step">
+        <span class="badge">Step 4 of 4 • STG 4th Ed. Teaching & Clinical Summary</span>
+        <div class="card" id="finalSummary"></div>
+        <button type="button" class="btn" onclick="copySummaryText(); return false;">Copy Clinical Summary</button>
+        <button type="button" class="btn btn-secondary" onclick="window.print(); return false;">Print / Save PDF</button>
+        <p id="copyStatusMsg" class="copy-status"></p>
+        <button type="button" class="btn" onclick="resetApp(); return false;">New Patient Case</button>
+      </div>
+    </div>
+
+    <div id="subView" class="view">
+      <div class="card">
+        <h3>Usage-Based & Subscription Plans (ETB • Chapa / Telebirr)</h3>
+        <p id="usageDetailText" style="font-size:0.86rem;color:#374151;"></p>
+        <div class="plan-grid">
+          <div class="plan-box"><strong>Case Pack (25 Cases)</strong><br/>Usage Metered • 100 ETB<button type="button" class="btn" onclick="selectPlan('Case Pack (25 Cases — 100 ETB)')">Select</button></div>
+          <div class="plan-box"><strong>Weekly Pass</strong><br/>7 Days • 150 ETB<button type="button" class="btn" onclick="selectPlan('Weekly Pass (7 Days — 150 ETB)')">Select</button></div>
+          <div class="plan-box"><strong>Monthly Plan</strong><br/>30 Days • 450 ETB<button type="button" class="btn" onclick="selectPlan('Monthly Plan (30 Days — 450 ETB)')">Select</button></div>
+          <div class="plan-box"><strong>Annual Plan</strong><br/>365 Days • 4,000 ETB<button type="button" class="btn" onclick="selectPlan('Annual Plan (365 Days — 4,000 ETB)')">Select</button></div>
+        </div>
+        <p id="planStatus" style="margin-top:10px;font-size:0.88rem;color:#0369a1;"></p>
+        <p class="note-warn">For enforced per-use billing and payment verification across all users, connect a backend service (/api/subscriptions/checkout & /api/usage/consume) with Chapa or Telebirr webhooks.</p>
+      </div>
+    </div>
+
+    <div id="adminView" class="view">
+      <div class="card">
+        <h3>Owner-Only STG 4th Edition Update Format</h3>
+        <div id="ownerLockSection">
+          <div class="lock-banner"><strong>Owner Access Protected:</strong> Enter your Owner PIN to unlock STG 4th Edition updates and export format. (Initial PIN: <code>2026</code> — you can change it once unlocked.)</div>
+          <label for="ownerPinInput">Owner PIN</label>
+          <input id="ownerPinInput" type="password" placeholder="Enter Owner PIN" />
+          <button type="button" class="btn" onclick="unlockOwnerPanel()">Unlock Owner Panel</button>
+          <p id="ownerLockMsg" style="margin-top:8px;font-size:0.86rem;color:#b91c1c;"></p>
+        </div>
+
+        <div id="ownerEditorSection" style="display:none;">
+          <p style="font-size:0.84rem;color:#065f46;font-weight:700;">Owner Mode Unlocked</p>
+          <label for="admWard">Ward / Section</label>
+          <select id="admWard">
+            <option value="pediatrics">Pediatrics & Neonatal</option>
+            <option value="gynecology">Gynecology & Obstetrics</option>
+            <option value="surgical">Surgical & Trauma</option>
+            <option value="medical">Medical & Infectious / Neuro / Metabolic</option>
+            <option value="oral_dental">11. Oral & Dental</option>
+            <option value="psychiatry">Psychiatry</option>
+            <option value="palliative">20. Palliative Care</option>
+          </select>
+          <label for="admTitle">Section / Condition Title</label>
+          <input id="admTitle" type="text" placeholder="e.g. Updated STG 4th Ed. Protocol Title" />
+          <label for="admNote">First-Line / Second-Line / Surgical / Care Note</label>
+          <textarea id="admNote" placeholder="Enter STG 4th Edition update note..."></textarea>
+          <button type="button" class="btn" onclick="saveAdminStg()">Save & Generate Update Format</button>
+          <p id="adminMsg" style="margin-top:8px;font-size:0.88rem;color:#047857;"></p>
+
+          <label for="newOwnerPin">Change Owner PIN (Optional)</label>
+          <input id="newOwnerPin" type="text" placeholder="Enter new Owner PIN (e.g. 8899)" />
+          <button type="button" class="btn btn-secondary" onclick="changeOwnerPin()">Update Owner PIN</button>
+          <button type="button" class="btn btn-secondary" onclick="lockOwnerPanel()">Lock Owner Panel</button>
+
+          <h3>Structured Update Format (For Global Release / Documentation)</h3>
+          <div id="updateExportSnippet" class="export-box">No custom update generated yet. Fill Title & Note above and click "Save & Generate Update Format".</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const ALL_SINGLE_INVESTIGATIONS = [
+      { id: "ob_bp", name: "Obstetric BP", options: ["None", "Low BP / Hypotension", "High BP (≥140/90 mmHg)", "Severe High BP (≥160/110 mmHg)", "Normal BP"], placeholder: "Blank space: Enter BP value (e.g. 85/55 or 165/110 mmHg)..." },
+      { id: "urine_protein", name: "Urine Protein (Proteinuria)", options: ["None", "Positive (+1 to +3)", "Trace", "Negative"], placeholder: "Blank space: Dipstick / 24h protein note..." },
+      { id: "ob_ultrasound", name: "Obstetric / Pelvic Ultrasound", options: ["None", "Retained placental tissue", "Uterine atony / subinvolution", "Placenta previa / abruption", "Adnexal / Ectopic / Intrauterine finding", "Normal"], placeholder: "Blank space: Ultrasound finding / GA / FHR..." },
+      { id: "cbc", name: "CBC", options: ["None", "Elevated WBC", "Low Hb (Anemia)", "High Hb", "Thrombocytopenia", "Normal"], placeholder: "Blank space: WBC, Hb (g/dL), Platelets..." },
+      { id: "rvs", name: "RVS / HIV", options: ["None", "Positive", "Negative", "Indeterminate"], placeholder: "Blank space: Enter numeric value / CD4 / Viral load / note..." },
+      { id: "malaria", name: "Malaria Test", options: ["None", "Plasmodium falciparum", "Plasmodium vivax", "Mixed (P. falciparum + P. vivax)", "Negative"], placeholder: "Blank space: Parasite density / RDT note..." },
+      { id: "ketones", name: "Ketones", options: ["None", "Ketone Positive (+)", "Ketone +1", "Ketone +2 / +3", "Negative"], placeholder: "Blank space: Ketone reading / value..." },
+      { id: "rbg", name: "RBG / Glucose", options: ["None", "High Glucose (Hyperglycemia)", "Low Glucose (Hypoglycemia)", "Normal"], placeholder: "Blank space: Enter numeric value (e.g. 310 mg/dL)..." },
+      { id: "bilirubin", name: "Serum Bilirubin (Neonatal / Hepatic)", options: ["None", "Elevated Bilirubin (Jaundice)", "Normal"], placeholder: "Blank space: Total / Direct Bilirubin value..." },
+      { id: "cxr", name: "Chest X-Ray", options: ["None", "Infiltrate", "Consolidation", "Pleural Effusion", "Cardiomegaly", "Normal"], placeholder: "Blank space: Chest X-Ray specific finding..." },
+      { id: "ecg", name: "ECG", options: ["None", "ST-segment change / Ischemia", "Arrhythmia", "Normal"], placeholder: "Blank space: ECG rate / rhythm / finding..." },
+      { id: "brain_ct", name: "Brain CT", options: ["None", "Ischemic infarct", "Hemorrhagic lesion", "Normal"], placeholder: "Blank space: Brain CT finding..." },
+      { id: "sputum_tb", name: "Sputum AFB / GeneXpert", options: ["None", "MTB Detected / AFB Positive", "Negative"], placeholder: "Blank space: GeneXpert / AFB / RIF status..." },
+      { id: "renal_rft", name: "RFT (Creatinine / Urea)", options: ["None", "Elevated Creatinine / Urea", "Normal"], placeholder: "Blank space: Creatinine, Urea, eGFR..." },
+      { id: "hepatic_lft", name: "LFT (AST / ALT)", options: ["None", "Elevated AST / ALT", "Normal"], placeholder: "Blank space: AST, ALT values..." },
+      { id: "thyroid_tsh", name: "TSH", options: ["None", "High TSH", "Low TSH", "Normal"], placeholder: "Blank space: TSH / T4 value..." },
+      { id: "stool", name: "Stool Examination", options: ["None", "Giardia lamblia trophozoites/cysts", "Entamoeba histolytica trophozoites/cysts", "RBCs / Mucus / Pus cells", "Helminth ova", "Normal"], placeholder: "Blank space: Stool microscopy / finding..." },
+      { id: "urinalysis", name: "Urinalysis", options: ["None", "WBC / Leukocytes / Nitrites positive (UTI)", "Glucose & Ketones positive", "Proteinuria", "Normal"], placeholder: "Blank space: Urinalysis finding..." },
+      { id: "surg_imaging", name: "Abdominal / Limb X-Ray or Ultrasound", options: ["None", "Fracture / Dislocation", "Bowel obstruction / Free air / Appendicitis or Mass", "Abscess / Fluid collection", "Normal"], placeholder: "Blank space: X-Ray / Ultrasound surgical note..." }
+    ];
+
+    const wardGuides = {
+      medical: {
+        symptoms: [
+          "Fever / Chills / Rigors / Sweating",
+          "Sudden choking / gagging / cough / wheeze / stridor / dyspnea (Foreign body aspiration)",
+          "Sudden focal limb weakness / hemiparesis / facial droop / speech slurring",
+          "Retrosternal chest pain / pressure / tightness radiating to arm, jaw, or back",
+          "Fever or hypothermia / chills / hypotension / tachycardia / tachypnea",
+          "Chronic cough / sputum / night sweats / weight loss / wheezing / dyspnea",
+          "Polyuria / Polydipsia / Weight loss / Fruity breath",
+          "Frequent watery stools (AGE) OR bloody/mucoid stools with tenesmus/cramping (dysentery/amebiasis)",
+          "Epigastric / Abdominal pain / Jaundice / Pallor / Fatigue / Edema / Oliguria"
+        ]
+      },
+      pediatrics: {
+        symptoms: [
+          "Sudden choking / gagging / cough / stridor / wheeze / cyanosis (Foreign body aspiration)",
+          "Neonatal poor feeding / poor suck / lethargy / hypothermia or fever",
+          "Neonatal jaundice (yellow skin/sclera/palms-soles)",
+          "Fast breathing / chest indrawing / nasal flaring / grunting",
+          "Vomiting / diarrhea / sunken eyes / poor skin turgor / dehydration",
+          "Convulsions / neck stiffness / bulging fontanelle",
+          "Severe wasting / edema (MUAC / SAM signs)"
+        ]
+      },
+      gynecology: {
+        symptoms: [
+          "Vaginal bleeding / abdominal cramping / passed tissue / missed period (Abortion / APH / Ectopic)",
+          "Headache / blurred vision / epigastric pain / high BP",
+          "Postpartum vaginal bleeding / uterine atony / retained tissue",
+          "Antepartum vaginal bleeding / abdominal pain",
+          "Postpartum fever / foul lochia / uterine tenderness (Puerperal sepsis)",
+          "Lower abdominal/pelvic pain / vaginal discharge / dysuria (PID/STI)",
+          "Dysmenorrhea / abnormal uterine bleeding"
+        ]
+      },
+      surgical: {
+        symptoms: [
+          "Acute abdominal pain / guarding / rebound / rigidity (Acute abdomen)",
+          "Vomiting / abdominal distension / obstipation / irreducible groin or abdominal lump (Hernia/Obstruction)",
+          "Painful fluctuant swelling / erythema / warmth / pus (Abscess/Cellulitis)",
+          "Limb pain / deformity / swelling / inability to bear weight (Fracture/Dislocation)",
+          "Animal or snake bite / contaminated wound / trismus or spasms (Bite/Tetanus)",
+          "Burns / trauma / active bleeding"
+        ]
+      },
+      oral_dental: {
+        symptoms: [
+          "Toothache / thermal or sweet sensitivity / tooth decay / cavity (Dental caries / Pulpitis)",
+          "Facial/gum/jaw swelling / pus / throbbing pain / fever (Dental abscess / Pericoronitis)",
+          "Red, swollen, or bleeding gums / bad breath / loose teeth (Gingivitis / Periodontitis)",
+          "Painful mouth/tongue/cheek ulcer or white patches/plaques (Oral ulcer / Aphthous / Oral candidiasis)",
+          "Knocked-out, loosened, or fractured tooth after trauma (Dental trauma / Tooth fracture)",
+          "Non-healing oral ulcer/mass / persistent mouth pain / difficulty chewing or swallowing (Oral cancer)"
+        ]
+      },
+      psychiatry: {
+        symptoms: ["Insomnia / Decreased need for sleep", "Low mood / Anhedonia / Hopelessness", "Anxiety / Panic / Restlessness", "Elevated/irritable mood / Grandiosity", "Hallucinations / Delusions", "Tremors / Sweating / Alcohol or substance withdrawal", "Suicidal ideation / Risk"]
+      },
+      palliative: {
+        symptoms: ["Pain (mild/moderate/severe)", "Fever", "Respiratory symptoms (dyspnea/secretions)", "GI symptoms (nausea/vomiting/constipation)", "Urinary symptoms (retention/dysuria)", "Skin problems (wound/pressure/itch)", "Infection signs", "Neuropsychiatric (delirium/anxiety/depression)", "Psychosocial distress", "Spiritual care needs", "End-of-life comfort needs"]
+      }
+    };
+
+    const STORAGE_KEY = "stg4_custom_ward_updates_v1";
+    const PIN_KEY = "stg4_owner_pin_v1";
+    const USAGE_KEY = "stg4_cases_completed_v1";
+
+    let customWardUpdates = {};
+    let ownerPin = "2026";
+    let casesCompleted = 0;
+
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) customWardUpdates = JSON.parse(saved);
+      const savedPin = localStorage.getItem(PIN_KEY);
+      if (savedPin) ownerPin = savedPin;
+      const savedUsage = localStorage.getItem(USAGE_KEY);
+      if (savedUsage) casesCompleted = parseInt(savedUsage, 10) || 0;
+    } catch (e) {}
+
+    const state = { demographics: null, vitals: {}, cc: "", ccDuration: "", symptoms: new Set(), invResults: {}, invCustomNotes: {}, extraInvIds: new Set(), caseCountedThisRun: false };
+
+    function getInvNameById(invId) {
+      const found = ALL_SINGLE_INVESTIGATIONS.find(i => i.id === invId);
+      return found ? found.name : invId;
+    }
+
+    function formatDurationClean(dur) {
+      if (!dur) return "";
+      return String(dur).replace(/,\s*/g, " ").trim();
+    }
+
+    function getSelectedInvArray(invId) {
+      const val = state.invResults[invId];
+      if (Array.isArray(val) && val.length) return val;
+      if (typeof val === "string" && val && val !== "None") return [val];
+      return ["None"];
+    }
+
+    function flattenInvText(invObj) {
+      const items = [];
+      Object.entries(invObj || {}).forEach(([k, v]) => {
+        const label = getInvNameById(k);
+        const arr = Array.isArray(v) ? v : (v ? [v] : []);
+        arr.forEach(opt => {
+          if (opt && opt !== "None") items.push(`${label}: ${opt}`);
+        });
+      });
+      return items.join(" | ");
+    }
+
+    function renderUsageUI() {
+      const pill = document.getElementById("usagePill");
+      if (pill) pill.textContent = `Cases Completed: ${casesCompleted}`;
+      const detail = document.getElementById("usageDetailText");
+      if (detail) detail.textContent = `Current session/device usage count: ${casesCompleted} clinical case(s) completed. Choose a usage pack or subscription plan below.`;
+    }
+
+    function parseBP(bpStr) {
+      if (!bpStr) return null;
+      const m = bpStr.match(/(\d{2,3})\s*\/\s*(\d{2,3})/);
+      if (!m) return null;
+      return { sbp: parseInt(m[1], 10), dbp: parseInt(m[2], 10) };
+    }
+
+    function parseNum(str) {
+      if (!str) return null;
+      const m = String(str).match(/(\d+(?:\.\d+)?)/);
+      return m ? parseFloat(m[1]) : null;
+    }
+
+    function isOralDentalCase(text, wardKey) {
+      return wardKey === "oral_dental" ||
+        text.includes("oral") || text.includes("dental") || text.includes("tooth") || text.includes("teeth") ||
+        text.includes("caries") || text.includes("pulpitis") || text.includes("gingivit") || text.includes("periodont") ||
+        text.includes("pericoron") || text.includes("aphthous") || text.includes("candidiasis") || text.includes("thrush") ||
+        text.includes("gum") || text.includes("jaw");
+    }
+
+    function generateCharacterizingSymptoms(ccText, wardKey, vitals) {
+      const c = (ccText || "").toLowerCase();
+      const bp = parseBP(vitals?.bp || "");
+      const generated = [];
+
+      if (c.includes("foreign body") || c.includes("aspirat") || c.includes("chok")) {
+        generated.push(
+          "Sudden choking / gagging / paroxysmal coughing / wheezing / stridor",
+          "Shortness of breath / tachypnea / chest indrawing / cyanosis / decreased air entry"
+        );
+      }
+      if (isOralDentalCase(c, wardKey)) {
+        generated.push(
+          "Toothache / pain on biting, cold, heat, or sweets / visible cavity (Dental caries / Pulpitis)",
+          "Localized swelling / pus / gum tenderness / difficulty opening mouth or fever (Dental abscess / Pericoronitis)",
+          "Bleeding or swollen gums / halitosis / tooth mobility (Gingivitis / Periodontitis)",
+          "Painful mouth/tongue/cheek ulcer or white curd-like plaque (Oral ulcer / Oral candidiasis)",
+          "Traumatized, chipped, displaced, or avulsed tooth / non-healing oral lesion (Dental trauma / Tooth fracture / Oral cancer)"
+        );
+      }
+      if (wardKey === "pediatrics" || c.includes("neonat") || c.includes("infant") || c.includes("child") || c.includes("pediatr") || c.includes("sam") || c.includes("malnutrition")) {
+        generated.push(
+          "Neonatal poor feeding / poor suck / lethargy / hypothermia or fever",
+          "Neonatal jaundice (yellow skin/sclera/palms-soles)",
+          "Fast breathing / chest indrawing / nasal flaring / grunting",
+          "Vomiting / diarrhea / sunken eyes / poor skin turgor / dehydration",
+          "Convulsions / neck stiffness / bulging fontanelle",
+          "Severe wasting / edema (MUAC / SAM signs)"
+        );
+      }
+      if (wardKey === "gynecology" || c.includes("abortion") || c.includes("miscarriage") || c.includes("preeclampsia") || c.includes("eclampsia") || c.includes("pph") || c.includes("aph") || c.includes("ectopic") || c.includes("puerperal") || c.includes("pid") || c.includes("sti") || c.includes("pregnant")) {
+        generated.push(
+          "Vaginal bleeding / abdominal cramping / passed tissue / missed period (Abortion / APH / Ectopic)",
+          "Headache / blurred vision / epigastric pain / high BP",
+          "Postpartum vaginal bleeding / uterine atony / retained tissue",
+          "Lower abdominal pain / missed period / shoulder tip pain / dizziness (Ectopic/Abortion)",
+          "Postpartum fever / foul lochia / uterine tenderness (Puerperal sepsis)",
+          "Lower abdominal/pelvic pain / vaginal discharge / dysuria (PID/STI)"
+        );
+      }
+      if (wardKey === "surgical" || c.includes("acute abdomen") || c.includes("appendic") || c.includes("hernia") || c.includes("obstruction") || c.includes("abscess") || c.includes("cellulitis") || c.includes("fracture") || c.includes("bite") || c.includes("tetanus") || c.includes("burn")) {
+        generated.push(
+          "Acute abdominal pain / guarding / rebound / rigidity (Acute abdomen)",
+          "Vomiting / abdominal distension / obstipation / irreducible groin or abdominal lump (Hernia/Obstruction)",
+          "Painful fluctuant swelling / erythema / warmth / pus (Abscess/Cellulitis)",
+          "Limb pain / deformity / swelling / inability to bear weight (Fracture/Dislocation)",
+          "Animal or snake bite / contaminated wound / trismus or spasms (Bite/Tetanus)",
+          "Burns / trauma / active bleeding"
+        );
+      }
+      if (c.includes("malaria") || c.includes("fever") || c.includes("chill") || c.includes("rigor") || c.includes("meningit")) {
+        generated.push("Fever / Chills / Rigors / Sweating", "Headache / Neck stiffness / Photophobia / Confusion (Meningitis/Febrile)", "Nausea / Vomiting / Pallor / Jaundice");
+      }
+      if (c.includes("asthma") || c.includes("wheez") || c.includes("heart failure") || c.includes("edema") || c.includes("orthopnea")) {
+        generated.push("Shortness of breath / wheezing / chest tightness (Asthma)", "Orthopnea / paroxysmal nocturnal dyspnea / ankle edema / fatigue (Heart failure)");
+      }
+      if (c.includes("pud") || c.includes("ulcer") || c.includes("gastrit") || c.includes("gerd") || c.includes("epigastric") || c.includes("heartburn")) {
+        generated.push("Epigastric pain / burning / bloating / nausea (PUD/Gastritis)", "Heartburn / acid regurgitation / post-meal discomfort (GERD)");
+      }
+      if (c.includes("stroke") || c.includes("hemiparesis") || c.includes("weakness") || c.includes("slurr")) {
+        generated.push("Sudden focal limb weakness / hemiparesis / facial droop", "Speech slurring / dysarthria / aphasia / visual field loss", "Altered consciousness / severe headache / vomiting");
+      }
+      if (c.includes("chest pain") || c.includes("acs") || c.includes("angina") || c.includes("infarct")) {
+        generated.push("Retrosternal chest pain / pressure / tightness radiating to arm, jaw, or back", "Associated sweating / nausea / shortness of breath / palpitations");
+      }
+      if (c.includes("sepsis") || c.includes("shock") || (bp && (bp.sbp < 90 || bp.dbp < 60))) {
+        generated.push("Fever or hypothermia / chills / rigors", "Hypotension / tachycardia / tachypnea / altered mental status", "Cool clammy extremities / prolonged capillary refill / low urine output");
+      }
+      if (c.includes("tb") || c.includes("tuberculosis") || c.includes("copd") || c.includes("hiv") || c.includes("rvs") || c.includes("shortness of breath") || c.includes("pneumonia")) {
+        generated.push("Chronic cough / sputum / night sweats / weight loss / wheezing / dyspnea", "Acute cough / fever / pleuritic chest pain / tachypnea (Pneumonia)", "Recurrent infections / oral thrush / lymphadenopathy / fatigue");
+      }
+      if (c.includes("renal") || c.includes("kidney") || c.includes("liver") || c.includes("hepatic") || c.includes("jaundice") || c.includes("thyroid")) {
+        generated.push("Oliguria / Edema / Flank or abdominal pain / Nausea", "Jaundice / Right upper quadrant discomfort / Ascites / Pruritus", "Heat or cold intolerance / Palpitations / Tremor / Weight change / Neck swelling");
+      }
+      if (c.includes("urinat") || c.includes("frequency") || c.includes("diabet") || c.includes("dka") || c.includes("polyuria") || c.includes("polydipsia")) {
+        generated.push("Polyuria / Polydipsia / Weight loss / Fruity breath", "Dysuria / Frequency / Urgency / Flank pain / Fever", "Vomiting / Abdominal pain / Deep rapid breathing / Dehydration");
+      }
+      if (c.includes("dysenter") || c.includes("diarrhea") || c.includes("diarrhoea") || c.includes("age") || c.includes("stool") || c.includes("giardia") || c.includes("ameb")) {
+        generated.push("Frequent watery stools (AGE) OR bloody/mucoid stools with tenesmus/cramping (dysentery/amebiasis)", "Vomiting / thirst / sunken eyes / dry mucous membranes / decreased urine output");
+      }
+
+      const wardSyms = (wardGuides[wardKey] || wardGuides.medical).symptoms;
+      wardSyms.forEach(s => {
+        if (!generated.includes(s)) generated.push(s);
+      });
+
+      return generated.slice(0, 11);
+    }
+
+    function generateRelevantInvestigations(ccText, wardKey, symArr) {
+      const combined = `${ccText} ${symArr.join(" ")}`.toLowerCase();
+      const neededIds = [];
+      const addId = id => {
+        if (!neededIds.includes(id)) neededIds.push(id);
+      };
+
+      if (combined.includes("foreign body") || combined.includes("aspirat") || combined.includes("chok")) {
+        addId("cxr");
+        addId("cbc");
+      }
+      if (isOralDentalCase(combined, wardKey)) {
+        addId("cbc");
+        if (combined.includes("candidiasis") || combined.includes("thrush") || combined.includes("ulcer") || combined.includes("cancer")) {
+          addId("rbg");
+        }
+        if (combined.includes("abscess") || combined.includes("trauma") || combined.includes("fracture") || combined.includes("cancer")) {
+          addId("surg_imaging");
+        }
+      }
+      if (wardKey === "gynecology" || combined.includes("abortion") || combined.includes("miscarriage") || combined.includes("preeclampsia") || combined.includes("eclampsia") || combined.includes("pph") || combined.includes("aph") || combined.includes("ectopic") || combined.includes("puerperal") || combined.includes("pregnant")) {
+        addId("ob_bp");
+        addId("urine_protein");
+        addId("ob_ultrasound");
+        addId("cbc");
+      }
+      if (wardKey === "pediatrics" || combined.includes("neonat") || combined.includes("jaundice") || combined.includes("sam") || combined.includes("malnutrition")) {
+        if (combined.includes("jaundice") || combined.includes("bilirubin") || combined.includes("hepatic") || combined.includes("liver")) {
+          addId("bilirubin");
+          addId("hepatic_lft");
+        }
+        addId("cbc");
+        addId("rbg");
+      }
+      if (wardKey === "surgical" || combined.includes("acute abdomen") || combined.includes("appendic") || combined.includes("hernia") || combined.includes("obstruction") || combined.includes("abscess") || combined.includes("cellulitis") || combined.includes("fracture") || combined.includes("bite") || combined.includes("burn")) {
+        addId("surg_imaging");
+        addId("cbc");
+      }
+      if (combined.includes("malaria") || combined.includes("fever") || combined.includes("chill") || combined.includes("rigor")) {
+        addId("malaria");
+        addId("cbc");
+        addId("rbg");
+        addId("rvs");
+      }
+      if (combined.includes("dysenter") || combined.includes("diarrhea") || combined.includes("diarrhoea") || combined.includes("age") || combined.includes("stool") || combined.includes("giardia") || combined.includes("ameb")) {
+        addId("stool");
+        addId("cbc");
+        addId("rbg");
+      }
+      if (combined.includes("urinat") || combined.includes("frequency") || combined.includes("diabet") || combined.includes("dka") || combined.includes("polyuria") || combined.includes("polydipsia") || combined.includes("dysuria") || combined.includes("uti")) {
+        addId("rbg");
+        addId("ketones");
+        addId("urinalysis");
+      }
+      if (combined.includes("cough") || combined.includes("dyspnea") || combined.includes("shortness of breath") || combined.includes("wheez") || combined.includes("asthma") || combined.includes("heart failure") || combined.includes("pneumonia") || combined.includes("chest pain") || combined.includes("acs")) {
+        addId("cxr");
+        addId("ecg");
+        addId("cbc");
+      }
+      if (combined.includes("anemia") || combined.includes("pallor")) {
+        addId("cbc");
+        addId("stool");
+      }
+      if (combined.includes("tb") || combined.includes("tuberculosis") || combined.includes("sputum") || combined.includes("copd")) {
+        addId("sputum_tb");
+        addId("cxr");
+        addId("rvs");
+      }
+      if (combined.includes("stroke") || combined.includes("hemiparesis") || combined.includes("weakness") || combined.includes("slurr") || combined.includes("neck stiff") || combined.includes("meningit") || combined.includes("convulsion")) {
+        addId("brain_ct");
+        addId("rbg");
+        addId("ecg");
+      }
+      if (combined.includes("renal") || combined.includes("kidney") || combined.includes("creatinine") || combined.includes("urea") || combined.includes("oliguria")) {
+        addId("renal_rft");
+        addId("urinalysis");
+      }
+      if (combined.includes("hepatic") || combined.includes("liver") || combined.includes("lft")) {
+        addId("hepatic_lft");
+        addId("bilirubin");
+      }
+      if (combined.includes("thyroid") || combined.includes("goiter") || combined.includes("tsh")) {
+        addId("thyroid_tsh");
+      }
+      if (combined.includes("hiv") || combined.includes("rvs")) {
+        addId("rvs");
+      }
+
+      if (!neededIds.length) {
+        addId("cbc");
+        addId("rbg");
+        addId("urinalysis");
+      }
+
+      state.extraInvIds.forEach(id => addId(id));
+
+      return ALL_SINGLE_INVESTIGATIONS.filter(inv => neededIds.includes(inv.id));
+    }
+
+    function buildSafetyAlerts(vitals, demo, text) {
+      const alerts = [];
+      const bp = parseBP(vitals?.bp || "");
+      const pr = parseNum(vitals?.pr || "");
+      const rr = parseNum(vitals?.rr || "");
+      const temp = parseNum(vitals?.temp || "");
+      const spo2 = parseNum(vitals?.spo2 || "");
+      const pregText = text.includes("pregnant") || text.includes("antenatal") || text.includes("abortion") || text.includes("miscarriage") || text.includes("aph") || text.includes("preeclampsia") || text.includes("eclampsia") || text.includes("pph") || text.includes("puerperal") || text.includes("ectopic") || text.includes("low bp");
+      const isFemale = (demo?.sex || "").toLowerCase() === "female";
+
+      if (text.includes("foreign body") || text.includes("aspirat") || text.includes("chok")) {
+        alerts.push("AIRWAY / ASPIRATION ALERT: Assess airway patency, breathing, SpO2, and stridor/wheeze immediately; prepare for urgent bronchoscopy/ENT/airway intervention per STG 4th Ed.");
+      }
+      if (text.includes("meningit") || (text.includes("neck stiff") && text.includes("fever"))) {
+        alerts.push("MENINGITIS / CNS ALERT: Assess GCS, neck stiffness, fever, and perfusion urgently; initiate empiric IV antibiotics promptly per STG 4th Ed.");
+      }
+      if (text.includes("ketone") || text.includes("dka") || text.includes("fruity")) {
+        alerts.push("DKA METABOLIC ALERT: Check RBG, ketones, hydration, electrolytes, and acid-base/mental status urgently; initiate IV fluids and insulin per STG 4th Ed. / hospital DKA protocol.");
+      }
+      if (spo2 !== null && spo2 < 90) alerts.push(`HYPOXIA ALERT (SpO2 ${spo2}%): Administer supplemental oxygen immediately.`);
+      if ((bp && (bp.sbp < 90 || bp.dbp < 60)) || text.includes("low bp") || text.includes("hypotension")) {
+        alerts.push(`LOW BP / SHOCK ALERT: Assess perfusion, hydration, bleeding/sepsis, and resuscitation needs immediately per STG 4th Ed.`);
+      }
+      if (bp && (bp.sbp >= 180 || bp.dbp >= 120)) alerts.push(`SEVERE HYPERTENSION ALERT (BP ${vitals.bp} mmHg): Screen urgently for target-organ damage, stroke, or preeclampsia/eclampsia per STG 4th Ed.`);
+      if (temp !== null && temp >= 38.5) alerts.push(`HIGH FEVER ALERT (Temp ${temp}°C): Check for infection/malaria/sepsis/dehydration per STG 4th Ed.`);
+      if (pr !== null && pr > 110) alerts.push(`TACHYCARDIA ALERT (PR ${pr} bpm): Evaluate for dehydration, fever, anemia, arrhythmia, or shock.`);
+      if (rr !== null && rr > 24) alerts.push(`TACHYPNEA ALERT (RR ${rr}/min): Evaluate for hypoxia, metabolic acidosis, pneumonia, or respiratory distress.`);
+      if (pregText || isFemale) {
+        alerts.push("PREGNANCY / REPRODUCTIVE SAFETY CHECK: Confirm pregnancy status when relevant and avoid pregnancy-contraindicated drugs (e.g., Doxycycline, Ciprofloxacin unless no safer alternative/indicated, Sodium Valproate, ACE inhibitors) per STG 4th Ed.");
+      }
+      return alerts;
+    }
+
+    function switchView(viewId, btn) {
+      document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+      document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+      document.getElementById(viewId).classList.add("active");
+      if (btn) btn.classList.add("active");
+      renderUsageUI();
+    }
+
+    function showStep(id) {
+      document.querySelectorAll(".step").forEach(el => el.classList.remove("active"));
+      const target = document.getElementById(id);
+      if (target) target.classList.add("active");
+      window.scrollTo(0, 0);
+    }
+
+    function buildClinicalPlan(wardKey, ccText, durationText, symArr, invObj, customNotesObj, demo, vitals) {
+      const cleanDur = formatDurationClean(durationText);
+      const customVals = Object.values(customNotesObj || {}).filter(v => v && v.trim()).join(" ");
+      const invVals = flattenInvText(invObj);
+      const rvsArr = getSelectedInvArray("rvs").map(x => x.toLowerCase());
+      const hasRvsPositive = rvsArr.includes("positive");
+      const text = `${ccText} ${cleanDur} ${symArr.join(" ")} ${invVals} ${customVals}`.toLowerCase();
+      const wt = demo?.weight ? `${demo.weight} kg` : "patient weight (kg)";
+      const ageStr = demo?.age ? `Age: ${demo.age}` : "";
+      const patientTag = [ageStr, demo?.weight ? `${demo.weight} kg` : ""].filter(Boolean).join(", ");
+      const chosenDetails = [invVals, customVals].filter(Boolean).join(" • ");
+
+      if (text.includes("asthma")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical / Respiratory): Asthma Exacerbation (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Wheezing, dyspnea, chest tightness, cough, ability to speak sentences vs. words, SpO2, and RR.",
+          rationale: "Rapid-acting inhaled bronchodilators and systemic corticosteroids reduce airway bronchoconstriction and inflammation per STG 4th Ed.",
+          firstLine: [
+            `Salbutamol (Inhaler via spacer or Nebulizer per STG 4th Ed.) + Prednisolone (40 mg once daily in adults or weight-based for ${wt} per STG 4th Ed.) + Oxygen if SpO2 <90% — Dose: per STG 4th Ed. & ${wt} • Route: Inhalation / PO • Duration: 5 days (Prednisolone).`
+          ],
+          secondLine: [
+            `Magnesium Sulfate (IV per STG 4th Ed. severe/life-threatening asthma protocol) or Ipratropium / Hospital Escalation — Dose: per STG 4th Ed. & ${wt} • Route: IV / Inhalation • Duration: acute inpatient care.`
+          ],
+          surgical: "Critical / Specialist Evaluation (STG 4th Ed.): Urgent HDU/ICU airway care if impending respiratory exhaustion/failure; no primary surgery.",
+          nutrition: "Adequate hydration and small meals once breathing stabilizes.",
+          nonPharm: "Upright comfortable positioning, trigger avoidance (smoke/dust/allergens), inhaler technique check, and SpO2/RR monitoring."
+        };
+      }
+
+      if (text.includes("heart failure") || text.includes("orthopnea") || text.includes("paroxysmal nocturnal")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical / Cardio): Heart Failure (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Dyspnea/orthopnea/PND, peripheral edema, elevated JVP/bibasilar crackles, cardiomegaly on CXR, and ECG/vitals.",
+          rationale: "Loop diuretics relieve volume overload while guideline-directed therapy (ACEi and beta-blocker when stabilized per STG 4th Ed.) improves outcomes.",
+          firstLine: [
+            `Furosemide (20–40 mg PO/IV initially, titrated per congestion & urine output for ${wt}) + Enalapril (start low dose, e.g., 2.5 mg PO once/twice daily if BP & renal function allow, avoiding in pregnancy per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO/IV • Duration: ongoing/titrated.`
+          ],
+          secondLine: [
+            `Beta-Blocker (e.g., Carvedilol or Metoprolol succinate started low & slow once euvolemic/stabilized per STG 4th Ed.) + Spironolactone (if indicated per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO • Duration: long-term maintenance.`
+          ],
+          surgical: "Cardiology / Specialist Evaluation (STG 4th Ed.): Refer if valvular/ischemic/refractory heart failure requires specialized intervention.",
+          nutrition: "Low-sodium diet and fluid restriction as advised per STG 4th Ed. / severity.",
+          nonPharm: "Semi-upright rest if dyspneic, daily weight & BP monitoring, and medication adherence."
+        };
+      }
+
+      if (text.includes("hypertension") || text.includes("high bp")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical / Cardio): Hypertension (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Repeated elevated BP readings, target-organ symptoms (chest pain, dyspnea, focal deficit, visual change), and comorbidities.",
+          rationale: "Lifestyle modification plus first-line antihypertensives (CCB, thiazide diuretic, or ACEi per STG 4th Ed. & comorbidities/pregnancy status) lower BP and cardiovascular risk.",
+          firstLine: [
+            `Amlodipine (5 mg PO once daily, max 10 mg/day) or Hydrochlorothiazide (12.5–25 mg PO once daily) or Enalapril (start 5 mg PO once/twice daily if non-pregnant per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO • Duration: long-term/ongoing.`
+          ],
+          secondLine: [
+            `Combination therapy (e.g., Amlodipine + Enalapril or Amlodipine + Hydrochlorothiazide) or dose titration per STG 4th Ed. BP targets — Dose: per STG 4th Ed. • Route: PO • Duration: long-term/ongoing.`
+          ],
+          surgical: "Specialist Evaluation (STG 4th Ed.): Urgent emergency care if hypertensive emergency with acute end-organ damage.",
+          nutrition: "Low-salt (DASH-style) diet, fruit/vegetable intake, and weight management.",
+          nonPharm: "Regular aerobic physical activity, limit alcohol, avoid tobacco, stress reduction, and home/clinic BP tracking."
+        };
+      }
+
+      if (text.includes("pud") || text.includes("peptic ulcer") || text.includes("gastrit") || text.includes("gerd") || text.includes("epigastric") || text.includes("heartburn")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical / GI): Acid-Peptic Disorder / Gastritis / GERD (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Epigastric pain/burning, heartburn/regurgitation, NSAID use, or alarm signs (GI bleeding, weight loss, persistent vomiting, dysphagia).",
+          rationale: "Proton pump inhibitors (e.g., Omeprazole) suppress gastric acid and promote mucosal healing per STG 4th Ed.",
+          firstLine: [
+            `Omeprazole (20–40 mg PO once daily before breakfast) + Antacid (10–20 mL PO PRN symptoms per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO • Duration: 4–8 weeks (or per ulcer/GERD protocol).`
+          ],
+          secondLine: [
+            `H. pylori Eradication Regimen (PPI + two appropriate antibiotics per STG 4th Ed. when H. pylori positive/indicated) — Dose: per STG 4th Ed. • Route: PO • Duration: 10–14 days.`
+          ],
+          surgical: "Surgical / GI Evaluation (STG 4th Ed.): Urgent surgical/endoscopic evaluation if GI bleeding, perforation, or gastric outlet obstruction.",
+          nutrition: "Small regular meals; avoid spicy/acidic foods, caffeine, and late-night eating before lying down.",
+          nonPharm: "Avoid NSAIDs/smoking/alcohol, elevate head of bed for nocturnal reflux, and seek urgent care for black/bloody stools or vomiting blood."
+        };
+      }
+
+      if (text.includes("meningit")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Neuro): Suspected Acute Bacterial Meningitis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Fever, severe headache, neck stiffness, altered mental status/GCS drop, photophobia, or convulsions.",
+          rationale: "Immediate empiric IV antibiotics (Ceftriaxone per STG 4th Ed.) and supportive stabilization reduce mortality and neurologic sequelae.",
+          firstLine: [
+            `Ceftriaxone (2 g IV q12h in adults or weight-based for ${wt} per STG 4th Ed.) + Dexamethasone (when indicated per STG 4th Ed. before/with first antibiotic dose) — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: 7–14 days per organism/protocol.`
+          ],
+          secondLine: [
+            `Escalated / Pathogen-Directed IV Antimicrobials (e.g., Vancomycin / Ampicillin as indicated per STG 4th Ed. & hospital protocol) — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per protocol.`
+          ],
+          surgical: "Neurosurgical / Specialist Evaluation (STG 4th Ed.): Urgent neurosurgical/ICU review if raised ICP, hydrocephalus, or focal mass.",
+          nutrition: "Check RBG; IV fluids/nutrition initially until airway and swallowing are safe.",
+          nonPharm: "Close GCS, vital signs, RBG, and seizure monitoring; droplet/infection control as indicated."
+        };
+      }
+
+      if (text.includes("anemia") || text.includes("pallor")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical): Anemia Evaluation (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Pallor, fatigue/dizziness/dyspnea, low Hb on CBC, bleeding/nutritional/parasitic/chronic disease clues, and hemodynamic stability.",
+          rationale: "Treating the underlying cause plus oral iron/folate (when iron/folate deficiency indicated) or transfusion (when severe/unstable per STG 4th Ed.) corrects anemia safely.",
+          firstLine: [
+            `Ferrous Sulfate (200 mg PO 1–3 times daily providing ~60–180 mg elemental iron in adults or weight-based for ${wt}) + Folic Acid (5 mg PO once daily per STG 4th Ed. when indicated) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: until Hb normalizes + ~3 months to replenish stores.`
+          ],
+          secondLine: [
+            `Packed RBC / Whole Blood Transfusion (if severe/symptomatic anemia or acute hemorrhage per STG 4th Ed.) + Etiology-specific therapy — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per transfusion/clinical indication.`
+          ],
+          surgical: "Surgical / Specialist Evaluation (STG 4th Ed.): Refer if GI/obstetric/surgical bleeding source requires intervention.",
+          nutrition: "Iron-rich foods (meat, legumes, dark leafy greens) with Vitamin C source; avoid tea/coffee right with iron doses.",
+          nonPharm: "Deworming/malaria/bleeding control as indicated and follow-up Hb check."
+        };
+      }
+
+      if (text.includes("pid") || text.includes("pelvic inflammatory") || text.includes("sti")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obs/Gyn & Infectious): Pelvic Inflammatory Disease (PID) / STI Evaluation (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Lower abdominal/pelvic pain, cervical motion/adnexal tenderness, abnormal vaginal discharge, dysuria, or fever.",
+          rationale: "Broad-spectrum coverage of *N. gonorrhoeae*, *C. trachomatis*, and anaerobes plus partner treatment prevents infertility and ectopic pregnancy per STG 4th Ed.",
+          firstLine: [
+            `Ceftriaxone (250–500 mg IM/IV single dose per STG 4th Ed.) + Doxycycline (100 mg PO q12h for 14 days — AVOID in pregnancy) + Metronidazole (400–500 mg PO q8–12h for 14 days) — Dose: per STG 4th Ed. • Route: IM/IV & PO • Duration: single dose (Ceftriaxone) & 14 days (Doxycycline + Metronidazole).`
+          ],
+          secondLine: [
+            `Inpatient IV Regimen (e.g., Ceftriaxone 1–2 g IV q24h + Metronidazole 500 mg IV q8h or Doxycycline per STG 4th Ed.) if severe PID, pregnancy, or non-response — Dose: per STG 4th Ed. • Route: IV/PO • Duration: until clinical improvement then complete 14 days.`
+          ],
+          surgical: "Gynecologic / Surgical Evaluation (STG 4th Ed.): Urgent review if tubo-ovarian abscess rupture, peritonitis, or ectopic pregnancy suspected.",
+          nutrition: "Adequate fluids and balanced nutrition.",
+          nonPharm: "Treat sexual partner(s), abstain from intercourse until treatment completed and symptoms resolve, and safe-sex counseling."
+        };
+      }
+
+      if (text.includes("burn")) {
+        return {
+          diagnosis: `Specific Diagnosis (Surgical / Trauma): Burns (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Burn depth (superficial/partial/full thickness), %TBSA, inhalation injury signs, electrical/chemical source, and pain/hydration.",
+          rationale: "Prompt fluid resuscitation (Ringer's Lactate for moderate/major burns), analgesia, clean wound care, and tetanus prophylaxis follow STG 4th Ed.",
+          firstLine: [
+            `Ringer's Lactate (for significant/moderate-severe burns per STG 4th Ed. fluid formula & ${wt}) + Paracetamol (500 mg–1 g PO/IV q6–8h PRN, max 4 g/day adults, or weight-based for ${wt}) + Tetanus Toxoid (0.5 mL IM if indicated) — Dose: per STG 4th Ed. & ${wt} • Route: IV/PO/IM • Duration: resuscitation & acute wound care.`
+          ],
+          secondLine: [
+            `Stepwise Analgesia (e.g., Tramadol / Morphine per STG 4th Ed. & pain severity) + Antimicrobials only if wound infection/sepsis develops — Dose: per STG 4th Ed. & ${wt} • Route: IV/IM/PO • Duration: per clinical indication.`
+          ],
+          surgical: "Surgical / Burn Unit Intervention (STG 4th Ed.): Wound debridement/dressing, escharotomy if constricting, and burn/surgical referral for deep/large TBSA/face/hand/perineal/inhalation burns.",
+          nutrition: "High-protein, high-calorie nutrition and fluids to support wound healing and hypermetabolic demand.",
+          nonPharm: "Cool running water early (not ice), sterile non-adherent dressings, prevent hypothermia, and monitor urine output."
+        };
+      }
+
+      if (wardKey === "psychiatry" || text.includes("psychos") || text.includes("mania") || text.includes("bipolar") || text.includes("depress") || text.includes("anxiety") || text.includes("alcohol withdrawal")) {
+        return {
+          diagnosis: `Specific Diagnosis (Psychiatry): ${symArr.join(", ") || ccText} (${chosenDetails || cleanDur || "Clinical Evaluation"}) (STG 4th Ed.)`,
+          clues: "Exclude medical/substance causes, assess self-harm/violence/agitation risk, and identify psychosis, mania, depression, anxiety, or withdrawal.",
+          rationale: "Safe supportive care plus STG 4th Ed. psychotropic or withdrawal therapy stabilizes acute symptoms and prevents relapse.",
+          firstLine: [
+            `Targeted STG 4th Ed. Regimen (e.g., Haloperidol / Risperidone for psychosis/mania; Fluoxetine / Amitriptyline for depression; Diazepam + Thiamine for alcohol withdrawal per STG 4th Ed.) — Dose: initiated low & titrated per STG 4th Ed. & ${wt} • Route: PO/IM • Duration: acute & maintenance per protocol.`
+          ],
+          secondLine: [
+            `Alternative psychotropic agent or specialist psychiatric titration per STG 4th Ed. tolerance & response — Dose: per STG 4th Ed. • Route: PO • Duration: maintenance.`
+          ],
+          surgical: "Medical / Safety Evaluation (STG 4th Ed.): Urgent medical workup if delirium/medical mimic is suspected.",
+          nutrition: "Regular meals, hydration, and Thiamine when alcohol use/withdrawal is present.",
+          nonPharm: "Safety planning, calm environment, family psychoeducation, and regular follow-up."
+        };
+      }
+
+      if (text.includes("acute abdomen")) {
+        return {
+          diagnosis: `Specific Diagnosis (Surgical): Acute Abdomen (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Sudden/severe abdominal pain, guarding/rebound/rigidity, vomiting, distension/obstipation, fever, or shock signs.",
+          rationale: "Prompt resuscitation, analgesia, appropriate perioperative/empiric antibiotics, and urgent surgical evaluation prevent peritonitis/sepsis per STG 4th Ed.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate — Dose: titrated to perfusion/BP (${wt}) • Route: IV • Duration: resuscitation & maintenance.`,
+            `Paracetamol — Dose: 500 mg–1 g q6–8h (max 4 g/day adults) or weight-based for ${wt} • Route: IV/PO • Duration: PRN pain control.`,
+            `Ceftriaxone + Metronidazole (when intra-abdominal infection/perioperative prophylaxis indicated per STG 4th Ed.) — Dose: Ceftriaxone 1–2 g q24h + Metronidazole 500 mg q8h (adults) or weight-based for ${wt} • Route: IV • Duration: perioperative / per surgical protocol.`
+          ],
+          secondLine: [
+            `Escalated Broad-Spectrum IV Antibiotics & Critical/Surgical Care (if peritonitis, perforation, or septic shock per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per surgical/ICU protocol.`
+          ],
+          surgical: "Surgical Intervention (STG 4th Ed.): Urgent surgical consultation for diagnostic/therapeutic laparotomy or targeted operative intervention as indicated.",
+          nutrition: "Keep NPO with IV maintenance/resuscitation fluids until surgical team clears oral intake.",
+          nonPharm: "Continuous BP, PR, RR, SpO2, Temp, urine output, and serial abdominal examination."
+        };
+      }
+
+      if (text.includes("foreign body") || text.includes("aspirat") || text.includes("chok")) {
+        return {
+          diagnosis: `Specific Diagnosis (Airway/Respiratory): Foreign Body Aspiration (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Sudden choking/gagging/coughing, focal wheeze/stridor/decreased breath sounds, hypoxia/tachypnea, or CXR findings (note: radiolucent foreign bodies may have normal CXR or air trapping).",
+          rationale: "Airway protection, supplemental oxygen when hypoxic, and timely bronchoscopic/ENT removal prevent airway obstruction, atelectasis, or pneumonia per STG 4th Ed.",
+          firstLine: [
+            `Supplemental Oxygen (if SpO2 <90% or respiratory distress) + Urgent Airway / Bronchoscopy / ENT Evaluation per STG 4th Ed. — Dose: titrated to maintain SpO2 ≥90–94% • Route: Inhalation / Procedural • Duration: immediate airway stabilization.`
+          ],
+          secondLine: [
+            `Amoxicillin-Clavulanate or Ceftriaxone (if secondary post-obstructive pneumonia/infection develops per STG 4th Ed.) — Dose: Amoxicillin-Clavulanate 625 mg–1 g q8–12h PO or Ceftriaxone 1–2 g q24h IV (adults) / weight-based for ${wt} • Route: PO/IV • Duration: 5–7 days.`
+          ],
+          surgical: "Procedural / Surgical Intervention (STG 4th Ed.): Urgent rigid/flexible bronchoscopy or ENT/thoracic intervention for foreign body extraction.",
+          nutrition: "Keep NPO until airway is safe and swallowing/aspiration risk is cleared.",
+          nonPharm: "Continuous SpO2, RR, PR, BP, and airway monitoring; avoid blind finger sweeps."
+        };
+      }
+
+      if (text.includes("oral cancer") || (text.includes("cancer") && (wardKey === "oral_dental" || text.includes("oral") || text.includes("mouth") || text.includes("tongue")))) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Suspected / Confirmed Oral Cancer (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Persistent/non-healing oral ulcer or mass (>2 weeks), induration, bleeding, pain, cervical lymphadenopathy, or tobacco/khat/alcohol risk.",
+          rationale: "Prompt biopsy/oncology & maxillofacial/ENT referral enables early staging and definitive care alongside STG 4th Ed. Ch. 20 symptom/pain relief.",
+          firstLine: [
+            `Paracetamol — Dose: 500 mg–1 g q6–8h (max 4 g/day adults) or weight-based for ${wt} + Chlorhexidine/Bland Mouth Care + Urgent Maxillofacial / ENT / Oncology Referral • Route: PO / Topical • Duration: until specialist care.`
+          ],
+          secondLine: [
+            `Stepwise Analgesia / Palliative Symptom Regimen per STG 4th Ed. Ch. 20 — Dose: titrated to pain/symptoms per STG 4th Ed. & ${wt} • Route: PO/SC/IV • Duration: ongoing.`
+          ],
+          surgical: "Surgical / Oncology Intervention (STG 4th Ed.): Tissue biopsy, staging, and surgical resection/multimodal oncology care by specialist team.",
+          nutrition: "Soft, high-calorie, high-protein, non-irritating foods and adequate hydration; nutritional support if dysphagia/weight loss occurs.",
+          nonPharm: "Cessation of tobacco/alcohol/irritants, gentle oral hygiene, and psychosocial/family support."
+        };
+      }
+
+      if (text.includes("oral candidiasis") || text.includes("thrush") || (text.includes("candidiasis") && isOralDentalCase(text, wardKey))) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Oral Candidiasis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "White curd-like plaques wiping off to leave erythematous/bleeding mucosa or erythematous soreness; evaluate underlying immunosuppression/antibiotics/inhalers.",
+          rationale: "Topical antifungals (Nystatin suspension or Miconazole oral gel per STG 4th Ed.) resolve superficial oral candidiasis; systemic therapy is used if extensive/refractory.",
+          firstLine: [
+            `Nystatin Oral Suspension (100,000 IU/mL: 1–2 mL [100,000–200,000 IU] q6h adults/children or per STG 4th Ed.) or Miconazole Oral Gel (2%: 2.5–5 mL q6h) — Dose: per STG 4th Ed. & ${wt} • Route: Topical / Swish & Swallow • Duration: 7–14 days.`
+          ],
+          secondLine: [
+            `Fluconazole (for moderate/severe/refractory oral candidiasis or immunocompromised patients per STG 4th Ed.) — Dose: 100–200 mg once daily (adults) or 3–6 mg/kg/day (children, for ${wt}) • Route: PO • Duration: 7–14 days.`
+          ],
+          surgical: "Dental / Medical Evaluation (STG 4th Ed.): Evaluate denture hygiene, inhaler rinsing, and underlying immune/HIV/diabetes status; no primary surgery.",
+          nutrition: "Adequate hydration and soft, non-irritating foods.",
+          nonPharm: "Clean/soak dentures daily, rinse mouth after inhaled corticosteroids, and maintain oral hygiene."
+        };
+      }
+
+      if (text.includes("aphthous")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Aphthous Ulcer (Recurrent Aphthous Stomatitis) (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Painful round/oval shallow oral mucosal ulcer with erythematous halo; rule out systemic causes if atypical/persistent.",
+          rationale: "Topical anti-inflammatory/analgesic oral care and Paracetamol relieve pain and promote healing per STG 4th Ed.",
+          firstLine: [
+            `Chlorhexidine / Saline Mouth Rinse + Paracetamol (500 mg–1 g q6–8h PRN adults, max 4 g/day, or weight-based for ${wt}) — Dose: per STG 4th Ed. • Route: Topical / PO • Duration: 5–7 days until healed.`
+          ],
+          secondLine: [
+            `Topical Corticosteroid Paste/Gel (for severe/recurrent aphthous ulcer per STG 4th Ed.) — Dose: apply thin film 2–4 times daily per STG 4th Ed. • Route: Topical • Duration: 5–7 days.`
+          ],
+          surgical: "Dental / Medical Evaluation (STG 4th Ed.): Biopsy/specialist review if ulcer persists >2–3 weeks or has atypical features.",
+          nutrition: "Avoid spicy, acidic, salty, or rough foods; maintain hydration.",
+          nonPharm: "Warm saline rinses, gentle toothbrushing, and stress/trigger reduction."
+        };
+      }
+
+      if (text.includes("oral ulcer")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Oral Ulcer Evaluation (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Ulcer duration, pain, trauma/sharp tooth or appliance irritation, infection, or suspicious induration.",
+          rationale: "Addressing local irritation/infection, symptomatic analgesia, and investigating persistent ulcers follow STG 4th Ed.",
+          firstLine: [
+            `Warm Saline / Chlorhexidine Rinse + Paracetamol (500 mg–1 g q6–8h PRN adults, max 4 g/day, or weight-based for ${wt}) — Dose: per STG 4th Ed. • Route: Topical / PO • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Specialist Dental / ENT / Maxillofacial Assessment & Targeted Therapy per STG 4th Ed. — Dose: per specialist guidance & ${wt} • Route: PO/Topical • Duration: per cause.`
+          ],
+          surgical: "Dental / Surgical Evaluation (STG 4th Ed.): Smooth sharp tooth/restoration or perform biopsy if ulcer persists >2 weeks.",
+          nutrition: "Soft, non-irritating diet and adequate fluids.",
+          nonPharm: "Gentle oral care and re-evaluate if ulcer does not heal within 2 weeks."
+        };
+      }
+
+      if (text.includes("pericoronitis")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Pericoronitis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Pain, swelling, and inflammation of gum tissue around a partially erupted tooth (commonly mandibular third molar), sometimes with trismus or pus.",
+          rationale: "Local irrigation/debridement, analgesia, and antibiotics (when spreading infection/systemic signs are present per STG 4th Ed.) control acute pericoronitis.",
+          firstLine: [
+            `Amoxicillin (500 mg q8h adults or weight-based for ${wt}) or Amoxicillin-Clavulanate (625 mg q8h) + Paracetamol (500 mg–1 g q6–8h PRN) + Warm Saline Rinses — Dose: per STG 4th Ed. • Route: PO / Topical • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Metronidazole (500 mg q8h PO added for anaerobes) or Ceftriaxone (1–2 g q24h IV if severe/spreading infection per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO/IV • Duration: 5–7 days.`
+          ],
+          surgical: "Dental / Oral Surgical Intervention (STG 4th Ed.): Operculectomy or extraction of offending/impacted tooth once acute infection is controlled or as indicated.",
+          nutrition: "Soft diet and fluids; avoid chewing on affected side.",
+          nonPharm: "Gentle warm saline rinses after meals and dental follow-up."
+        };
+      }
+
+      if (text.includes("dental abscess") || (text.includes("abscess") && isOralDentalCase(text, wardKey))) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Dental Abscess (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Localized or spreading odontogenic swelling, pus/sinus tract, severe tooth/jaw pain, fever, or facial cellulitis/trismus.",
+          rationale: "Definitive drainage/dental source control plus antibiotics (Amoxicillin or Amoxicillin-Clavulanate +/- Metronidazole per STG 4th Ed.) and analgesia prevent deep space spread.",
+          firstLine: [
+            `Amoxicillin (500 mg q8h adults or weight-based for ${wt}) or Amoxicillin-Clavulanate (625 mg q8h) + Paracetamol (500 mg–1 g q6–8h PRN) — Dose: per STG 4th Ed. • Route: PO • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Metronidazole (500 mg q8h PO combined for anaerobes) or Ceftriaxone (1–2 g q24h IV if spreading facial cellulitis/systemic toxicity per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO/IV • Duration: 5–7 days.`
+          ],
+          surgical: "Dental / Oral Surgical Intervention (STG 4th Ed.): Incision and drainage, root canal treatment, or tooth extraction; urgent hospital referral if deep neck/airway swelling.",
+          nutrition: "Hydration and soft, high-protein diet as tolerated.",
+          nonPharm: "Warm saline rinses (not hot external heat on facial swelling) and urgent airway/swelling monitoring."
+        };
+      }
+
+      if (text.includes("periodont")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Periodontitis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Chronic gum inflammation, periodontal pockets/attachment loss, bleeding, halitosis, or loose teeth.",
+          rationale: "Professional scaling/root planing, plaque control, and adjunctive antibiotics (when indicated per STG 4th Ed.) halt periodontal progression.",
+          firstLine: [
+            `Amoxicillin (500 mg q8h) + Metronidazole (400–500 mg q8h) (when adjunctive antimicrobials indicated per STG 4th Ed.) + Chlorhexidine Mouthwash — Dose: per STG 4th Ed. & ${wt} • Route: PO / Topical • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Amoxicillin-Clavulanate (625 mg q8h) or Alternative Dental Regimen per STG 4th Ed. — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: 5–7 days.`
+          ],
+          surgical: "Dental / Periodontal Intervention (STG 4th Ed.): Professional scaling and root planing; extraction of non-salvageable teeth.",
+          nutrition: "Balanced, nutrient-rich diet and adequate hydration.",
+          nonPharm: "Twice-daily brushing with fluoride toothpaste, interdental cleaning, and tobacco cessation."
+        };
+      }
+
+      if (text.includes("gingivit")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Gingivitis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Red, edematous gingiva that bleeds easily on brushing/probing without deep periodontal attachment loss.",
+          rationale: "Plaque removal, effective oral hygiene, and antiseptic/antimicrobial measures (when acute/necrotizing per STG 4th Ed.) resolve gingivitis.",
+          firstLine: [
+            `Chlorhexidine Mouthwash / Antiseptic Rinse + Paracetamol (500 mg–1 g q6–8h PRN adults, max 4 g/day, or weight-based for ${wt}) — Dose: per STG 4th Ed. • Route: Topical / PO • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Metronidazole (400–500 mg q8h) or Amoxicillin (500 mg q8h) (if acute necrotizing ulcerative gingivitis or systemic signs per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: 5 days.`
+          ],
+          surgical: "Dental Intervention (STG 4th Ed.): Professional dental scaling/prophylaxis to remove plaque and calculus.",
+          nutrition: "Balanced diet and hydration.",
+          nonPharm: "Gentle regular toothbrushing and oral hygiene education."
+        };
+      }
+
+      if (text.includes("acute pulpitis")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Acute Pulpitis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Sharp/throbbing tooth pain often triggered by thermal/sweet stimuli or spontaneous/lingering pain; check for periapical abscess/systemic signs.",
+          rationale: "Analgesia and definitive dental care (caries excavation/pulp therapy/root canal/extraction) treat pulpitis; antibiotics are reserved for spreading infection per STG 4th Ed.",
+          firstLine: [
+            `Paracetamol (500 mg–1 g q6–8h PRN adults, max 4 g/day, or weight-based for ${wt}) or Ibuprofen (400 mg q8h PRN if non-contraindicated per STG 4th Ed.) + Urgent Dental Care — Dose: per STG 4th Ed. • Route: PO • Duration: until dental treatment (max 3–5 days).`
+          ],
+          secondLine: [
+            `Amoxicillin (500 mg q8h adults or weight-based for ${wt}, only if signs of spreading infection/abscess per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO • Duration: 5 days.`
+          ],
+          surgical: "Dental Intervention (STG 4th Ed.): Definitive endodontic treatment (pulpotomy/root canal) or extraction by a dentist.",
+          nutrition: "Avoid very hot, cold, or sugary foods/drinks on affected tooth.",
+          nonPharm: "Keep area clean and seek prompt dental treatment."
+        };
+      }
+
+      if (text.includes("dental caries") || text.includes("caries")) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): Dental Caries (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Demineralization/cavitation of enamel/dentin, sensitivity or pain, and absence of spreading abscess.",
+          rationale: "Restorative dental treatment, fluoride/oral hygiene, and analgesia for pain control address dental caries per STG 4th Ed.",
+          firstLine: [
+            `Paracetamol (500 mg–1 g q6–8h PRN adults, max 4 g/day, or weight-based for ${wt}) + Fluoride Toothpaste / Restorative Dental Care per STG 4th Ed. — Dose: per STG 4th Ed. • Route: PO / Topical • Duration: PRN / restorative visit.`
+          ],
+          secondLine: [
+            `Amoxicillin (500 mg q8h adults or weight-based for ${wt}, only if secondary pulp/periapical infection develops per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO • Duration: 5 days.`
+          ],
+          surgical: "Dental Intervention (STG 4th Ed.): Dental filling/restoration or extraction if tooth is unrestorable.",
+          nutrition: "Limit free sugars and frequent sugary snacks; drink water after meals.",
+          nonPharm: "Brush twice daily with fluoride toothpaste and attend routine dental checkups."
+        };
+      }
+
+      if (text.includes("tooth fracture") || text.includes("dental trauma") || (text.includes("trauma") && isOralDentalCase(text, wardKey))) {
+        return {
+          diagnosis: `Specific Diagnosis (11. Oral & Dental): ${text.includes("fracture") ? "Tooth Fracture" : "Dental Trauma"} (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Crown/root fracture, tooth displacement/intrusion/extrusion, avulsion, pulp exposure, or soft-tissue laceration.",
+          rationale: "Analgesia, keeping an avulsed tooth moist (milk/saline/saliva), tetanus check if contaminated, and urgent dental care preserve tooth vitality per STG 4th Ed.",
+          firstLine: [
+            `Paracetamol (500 mg–1 g q6–8h PRN adults, max 4 g/day, or weight-based for ${wt}) + Tetanus Toxoid (0.5 mL if contaminated wound & indicated per STG 4th Ed.) + Urgent Dental Evaluation — Dose: per STG 4th Ed. • Route: PO / IM • Duration: acute care.`
+          ],
+          secondLine: [
+            `Amoxicillin (500 mg q8h) or Amoxicillin-Clavulanate (625 mg q8h) (if indicated after avulsion/replantation or infection per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: 5–7 days.`
+          ],
+          surgical: "Dental Intervention (STG 4th Ed.): Urgent tooth reimplantation/splinting, pulp protection/restoration, or extraction as indicated.",
+          nutrition: "Soft diet and cool/room-temperature fluids.",
+          nonPharm: "Handle avulsed tooth by crown only (not root), store in milk/saline, and seek immediate dental care."
+        };
+      }
+
+      if (text.includes("neonatal jaundice") || (text.includes("jaundice") && (wardKey === "pediatrics" || text.includes("neonat") || text.includes("infant")))) {
+        return {
+          diagnosis: `Specific Diagnosis (Pediatrics/Neonatal): Neonatal Jaundice / Hyperbilirubinemia (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Onset (<24h vs. >24h), extent of yellowing, bilirubin level, feeding/lethargy, and signs of sepsis or kernicterus.",
+          rationale: "Frequent breastfeeding, phototherapy when indicated by bilirubin/age/risk, and treating sepsis/hemolysis prevent bilirubin encephalopathy per STG 4th Ed.",
+          firstLine: [
+            `Frequent Exclusive Breastfeeding (8–12+ feeds/24h) + Phototherapy (when indicated by bilirubin level, postnatal age & risk per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO & Phototherapy • Duration: until safe bilirubin level.`
+          ],
+          secondLine: [
+            `Exchange Transfusion (in severe/refractory hyperbilirubinemia or signs of acute bilirubin encephalopathy per STG 4th Ed.) + Ampicillin & Gentamicin (if neonatal sepsis suspected per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: IV/IM • Duration: per neonatal protocol.`
+          ],
+          surgical: "Surgical / Specialist Evaluation (STG 4th Ed.): Neonatal/pediatric specialist evaluation if prolonged/obstructive jaundice or biliary atresia is suspected.",
+          nutrition: "Frequent on-demand breastfeeding; avoid unprescribed herbal remedies or glucose water.",
+          nonPharm: "Eye protection during phototherapy, temperature & hydration monitoring, and urgent care for poor feeding, lethargy, or high-pitched cry/arching."
+        };
+      }
+
+      if (text.includes("neonatal sepsis") || (wardKey === "pediatrics" && (text.includes("poor feeding") || text.includes("poor suck") || text.includes("letharg") || text.includes("sepsis")))) {
+        return {
+          diagnosis: `Specific Diagnosis (Pediatrics/Neonatal): Neonatal Sepsis / Possible Serious Bacterial Infection (${chosenDetails || symArr.join(", ") || ccText}) (STG 4th Ed.)`,
+          clues: "Poor feeding/suck, lethargy/irritability, fever or hypothermia, fast breathing/chest indrawing, convulsions, or umbilical redness/pus.",
+          rationale: "Prompt empiric IV/IM Ampicillin + Gentamicin (or Ceftriaxone per STG 4th Ed.), glucose/thermal support, and resuscitation save neonatal lives.",
+          firstLine: [
+            `Ampicillin + Gentamicin (per STG 4th Ed. neonatal sepsis protocol) — Dose: weight- & age-banded for ${wt} per STG 4th Ed. • Route: IV/IM • Duration: 7–10 days (or per clinical/culture response).`
+          ],
+          secondLine: [
+            `Ceftriaxone or Escalated Neonatal Antimicrobial Regimen per STG 4th Ed. & clinical response — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per protocol.`
+          ],
+          surgical: "Surgical / Neonatal Specialist Evaluation (STG 4th Ed.): Urgent surgical review if necrotizing enterocolitis (NEC), omphalitis complication, or abscess is suspected.",
+          nutrition: "Check blood glucose urgently; support breast milk/IV fluids as tolerated and safe from aspiration.",
+          nonPharm: "Warmth/Kangaroo Mother Care when stable, airway/oxygen if hypoxic, and close monitoring of vitals, feeding & convulsions."
+        };
+      }
+
+      if (text.includes("severe acute malnutrition") || text.includes("sam") || text.includes("malnutrition") || text.includes("wasting") || text.includes("muac")) {
+        return {
+          diagnosis: `Specific Diagnosis (Pediatrics): Severe Acute Malnutrition (SAM) (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Severe wasting/low MUAC (<11.5 cm in 6–59m) or bilateral pitting edema, appetite test pass/fail, and medical complications.",
+          rationale: "STG 4th Ed. / Ethiopian SAM protocol manages complicated SAM inpatient (F-75 stabilization, then F-100/RUTF + IV antibiotics) and uncomplicated SAM with RUTF & follow-up.",
+          firstLine: [
+            `F-75 Therapeutic Milk (stabilization) then F-100 or RUTF (Plumpy'Nut) — Dose: calculated per ${wt} & SAM phase per STG 4th Ed. • Route: PO/NG • Duration: stabilization, transition & rehabilitation.`,
+            `Amoxicillin (uncomplicated SAM) or Ampicillin + Gentamicin (complicated SAM per STG 4th Ed.) — Dose: weight-based for ${wt} per STG 4th Ed. • Route: PO or IV/IM • Duration: 5–7 days per protocol.`
+          ],
+          secondLine: [
+            `Ceftriaxone or Targeted Antimicrobial / Specialist Pediatric SAM Care per STG 4th Ed. — Dose: weight-based for ${wt} per STG 4th Ed. • Route: IV/PO • Duration: per clinical response.`
+          ],
+          surgical: "Surgical / Specialist Evaluation (STG 4th Ed.): Refer if surgical lesion or severe complication is identified.",
+          nutrition: "Strict adherence to STG 4th Ed. therapeutic milk/RUTF schedule; prevent hypoglycemia and hypothermia.",
+          nonPharm: "Thermal protection, gentle handling, developmental stimulation, and caregiver counseling."
+        };
+      }
+
+      if (wardKey === "pediatrics" && (text.includes("fast breathing") || text.includes("chest indrawing") || text.includes("pneumonia"))) {
+        const isSevere = text.includes("chest indrawing") || text.includes("stridor") || text.includes("danger") || text.includes("cyanosis");
+        return {
+          diagnosis: `Specific Diagnosis (Pediatrics): ${isSevere ? "Severe Pneumonia" : "Pneumonia"} (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Age-specific fast breathing, lower chest indrawing, cough/fever, hypoxia (SpO2 <90%), or general danger signs.",
+          rationale: "Amoxicillin (oral for non-severe) or IV Ampicillin/Gentamicin/Ceftriaxone (for severe pneumonia per STG 4th Ed.) plus oxygen when SpO2 <90% treats pediatric pneumonia.",
+          firstLine: [
+            isSevere
+              ? `Ampicillin + Gentamicin (or Ceftriaxone per STG 4th Ed. severe pediatric pneumonia) + Oxygen if SpO2 <90% — Dose: weight-based for ${wt} per STG 4th Ed. • Route: IV/IM • Duration: 5–7 days.`
+              : `Amoxicillin — Dose: weight-based pediatric dose (e.g., ≥40 mg/kg/dose q12h or per STG 4th Ed.) for ${wt} • Route: PO • Duration: 5 days.`
+          ],
+          secondLine: [
+            `Ceftriaxone or Escalated Pediatric Regimen per STG 4th Ed. — Dose: weight-based for ${wt} per STG 4th Ed. • Route: IV • Duration: 5–7 days.`
+          ],
+          surgical: "Surgical / Thoracic Evaluation (STG 4th Ed.): Chest tube/pediatric surgical review if empyema or large effusion develops.",
+          nutrition: "Continue breastfeeding/fluids and small frequent meals as tolerated.",
+          nonPharm: "Clear nasal secretions gently, monitor RR/SpO2/Temp, and return immediately if danger signs appear."
+        };
+      }
+
+      if (text.includes("ectopic")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obs/Gyn): Suspected Ectopic Pregnancy (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "Missed menstrual period, lower abdominal/pelvic pain, vaginal spotting/bleeding, shoulder tip pain, dizziness/syncope.",
+          rationale: "Urgent resuscitation, crossmatch/Hb check, ultrasound/pregnancy evaluation, and prompt surgical/gynecologic intervention per STG 4th Ed.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate + Paracetamol (for pain per STG 4th Ed.) + Urgent Obstetric/Gynecologic & Surgical Consultation — Dose: IV fluid titrated to BP/perfusion; Paracetamol 500 mg–1 g q6–8h (max 4 g/day) • Route: IV/PO • Duration: immediate stabilization.`
+          ],
+          secondLine: [
+            `Blood Transfusion / Crossmatch support (if significant blood loss/anemia per STG 4th Ed.) or Specialist Gynecologic Protocol — Dose: per STG 4th Ed. • Route: IV • Duration: emergency perioperative care.`
+          ],
+          surgical: "Surgical Intervention (STG 4th Ed. Ch. 19): Urgent laparoscopy or laparotomy for ruptured or unstable ectopic pregnancy per obstetric/surgical protocol.",
+          nutrition: "Keep NPO while urgent surgical evaluation/resuscitation is underway.",
+          nonPharm: "Continuous BP, PR, RR, SpO2, pain, and bleeding monitoring."
+        };
+      }
+
+      if (text.includes("abortion") || text.includes("miscarriage")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obs/Gyn): Abortion Care Evaluation (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "Vaginal bleeding, lower abdominal cramping, passed products of conception, cervical status, hemodynamic stability, and signs of infection/sepsis.",
+          rationale: "Prompt resuscitation if bleeding/shock, uterotonic/evacuation therapy (Misoprostol or MVA/D&E per STG 4th Ed. & clinical indication), antibiotics if infected, and post-abortion contraception/counseling save lives.",
+          firstLine: [
+            `Misoprostol (e.g., 600 mcg PO single dose, 400 mcg sublingual single dose, or 400–800 mcg vaginally for incomplete abortion per STG 4th Ed./protocol) + 0.9% Sodium Chloride / Ringer's Lactate (if bleeding/dehydration) + Paracetamol (500 mg–1 g q6–8h PRN pain) — Dose: per STG 4th Ed. • Route: PO/SL/Vaginal/IV • Duration: single dose / per evacuation protocol.`
+          ],
+          secondLine: [
+            `Oxytocin (for active bleeding per protocol) + Ceftriaxone + Metronidazole (if septic/infected abortion per STG 4th Ed.) — Dose: Ceftriaxone 1–2 g q24h + Metronidazole 500 mg q8h (adults) • Route: IV • Duration: 7–14 days if infected.`
+          ],
+          surgical: "Obstetric / Gynecologic Procedure (STG 4th Ed. Ch. 19): Manual Vacuum Aspiration (MVA) or evacuation per clinical indication and guideline.",
+          nutrition: "Hydration and iron/protein-rich diet once bleeding is controlled.",
+          nonPharm: "Monitor bleeding, BP, PR, Temp, and pain; provide post-abortion counseling and family planning options."
+        };
+      }
+
+      if (text.includes("eclampsia")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obstetrics): Eclampsia (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "Seizures/convulsions in pregnancy or postpartum with elevated BP / preeclampsia signs.",
+          rationale: "Magnesium sulfate controls/prevents eclamptic seizures while antihypertensives control severe BP and prompt delivery is arranged per STG 4th Ed.",
+          firstLine: [
+            `Magnesium Sulfate (MgSO4) per STG 4th Ed. eclampsia regimen (loading IV/IM + maintenance per STG 4th Ed.) + Hydralazine (e.g., 5–10 mg IV bolus q20–30min PRN) or Nifedipine (e.g., 10 mg PO, repeat q30min PRN per STG 4th Ed.) for severe BP (≥160/110 mmHg) — Dose: per STG 4th Ed. • Route: IV/IM & IV/PO • Duration: acute & 24h post-delivery/last seizure.`
+          ],
+          secondLine: [
+            `Repeat MgSO4 bolus (e.g., 2 g IV over 5 min per STG 4th Ed.) if recurrent seizure + Specialist/ICU care — Dose: per STG 4th Ed. • Route: IV • Duration: per protocol.`
+          ],
+          surgical: "Obstetric / Surgical Intervention (STG 4th Ed. Ch. 19): Stabilize maternal condition first, then expedite delivery per obstetric indication.",
+          nutrition: "Keep NPO during active seizure/stabilization.",
+          nonPharm: "Airway/oxygen, left lateral position, seizure safety, and close BP/RR/reflex/urine output monitoring."
+        };
+      }
+
+      if (text.includes("preeclampsia") || text.includes("proteinuria")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obstetrics): Preeclampsia (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "BP ≥140/90 mmHg after 20 weeks gestation (or postpartum) with proteinuria or severe features.",
+          rationale: "Antihypertensives lower severe BP, MgSO4 prevents seizures when severe features are present, and timely delivery follows STG 4th Ed.",
+          firstLine: [
+            `Hydralazine or Nifedipine (or Methyldopa per STG 4th Ed.) + Magnesium Sulfate (MgSO4 if severe preeclampsia per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO/IV/IM • Duration: per severity & delivery plan.`
+          ],
+          secondLine: [
+            `Escalated antihypertensive / MgSO4 maintenance & urgent obstetric referral — Dose: per STG 4th Ed. • Route: IV/PO • Duration: until delivery & postpartum stabilization.`
+          ],
+          surgical: "Obstetric / Surgical Intervention (STG 4th Ed. Ch. 19): Planned or expedited delivery / Cesarean section when indicated.",
+          nutrition: "Balanced antenatal/postpartum diet and fluids (NPO if operative delivery planned).",
+          nonPharm: "Frequent BP, urine protein, fetal monitoring, and danger-sign education."
+        };
+      }
+
+      if (text.includes("pph") || text.includes("postpartum hemorrhage") || text.includes("uterine atony")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obstetrics): Postpartum Hemorrhage (PPH) (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "Excessive postpartum bleeding, uterine tone, and hemodynamic status.",
+          rationale: "Oxytocin, isotonic IV crystalloids, uterine massage, and Tranexamic Acid per STG 4th Ed. rapidly arrest bleeding and restore perfusion.",
+          firstLine: [
+            `Oxytocin (e.g., 10 IU IM or IV infusion per STG 4th Ed. PPH protocol) + 0.9% Sodium Chloride / Ringer's Lactate — Dose: per STG 4th Ed. • Route: IV/IM • Duration: active bleeding control.`
+          ],
+          secondLine: [
+            `Tranexamic Acid (e.g., 1 g IV over 10 min within 3 hours of onset per STG 4th Ed.) + Misoprostol (per STG 4th Ed. if non-contraindicated) + Blood transfusion if indicated — Dose: per STG 4th Ed. • Route: IV/PO • Duration: emergency response.`
+          ],
+          surgical: "Obstetric / Surgical Intervention (STG 4th Ed. Ch. 19): Uterine massage/bimanual compression, removal of retained tissue/placenta, repair of genital tract tears, or surgical exploration/laparotomy.",
+          nutrition: "IV fluids initially; iron-rich fluids/meals once bleeding controlled.",
+          nonPharm: "Continuous BP, PR, bleeding volume, uterine tone, and urine output monitoring."
+        };
+      }
+
+      if (text.includes("aph") || text.includes("antepartum") || text.includes("placenta previa") || text.includes("abruption")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obstetrics): Antepartum Hemorrhage (APH) Evaluation (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "Vaginal bleeding after 24 weeks gestation, abdominal pain/tenderness, uterine tone, fetal heart rate, and hemodynamic status.",
+          rationale: "Resuscitation, avoiding unsafe digital vaginal exam before placenta previa is excluded, and timely obstetric/surgical care follow STG 4th Ed.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate + Crossmatch/Hb Check + Urgent Obstetric Care per STG 4th Ed. — Dose: IV fluid titrated to perfusion/BP • Route: IV • Duration: immediate stabilization.`
+          ],
+          secondLine: [
+            `Blood Transfusion / Specialist Obstetric & Neonatal Care per STG 4th Ed. — Dose: per STG 4th Ed. • Route: IV • Duration: per emergency protocol.`
+          ],
+          surgical: "Obstetric / Surgical Intervention (STG 4th Ed. Ch. 19): Expedited delivery / Cesarean section if severe bleeding or maternal/fetal compromise occurs.",
+          nutrition: "Keep NPO until obstetric/surgical plan is established.",
+          nonPharm: "Strict BP, PR, bleeding, and fetal heart rate monitoring; avoid unindicated vaginal exam."
+        };
+      }
+
+      if (text.includes("puerperal") || text.includes("lochia") || text.includes("endometritis")) {
+        return {
+          diagnosis: `Specific Diagnosis (Obstetrics): Puerperal Sepsis / Postpartum Endometritis (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed. Ch. 19)`,
+          clues: "Postpartum/post-abortion fever, foul lochia, uterine tenderness/subinvolution, or lower abdominal pain.",
+          rationale: "Broad-spectrum IV antibiotics covering aerobes and anaerobes plus fluid resuscitation and checking for retained tissue follow STG 4th Ed.",
+          firstLine: [
+            `Ceftriaxone (1–2 g q24h adults or weight-based for ${wt}) + Metronidazole (500 mg q8h adults or weight-based for ${wt}) + IV Crystalloid — Dose: per STG 4th Ed. • Route: IV • Duration: until afebrile 48h then oral step-down to complete 7–14 days.`
+          ],
+          secondLine: [
+            `Escalated Broad-Spectrum IV Antimicrobial Regimen per STG 4th Ed. & clinical response — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per inpatient protocol.`
+          ],
+          surgical: "Obstetric / Surgical Intervention (STG 4th Ed. Ch. 19): Uterine evacuation if retained products/tissue, or abscess/wound drainage/laparotomy if indicated.",
+          nutrition: "Fluids and high-protein, iron-rich nutrition once stabilized.",
+          nonPharm: "Monitor Temp, BP, PR, RR, urine output, uterine involution, and lochia."
+        };
+      }
+
+      if (text.includes("appendic") || text.includes("guarding") || text.includes("rebound")) {
+        return {
+          diagnosis: `Specific Diagnosis (Surgical): Suspected Acute Appendicitis (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "RLQ/abdominal pain, rebound/guarding/rigidity, nausea/vomiting, fever, or leukocytosis.",
+          rationale: "Prompt surgical evaluation, IV fluids, analgesia, and perioperative/empiric antibiotics per STG 4th Ed. reduce perforation risk.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate + Paracetamol (500 mg–1 g q6–8h PRN, max 4 g/day adults, or weight-based for ${wt}) + Ceftriaxone + Metronidazole (if indicated per STG 4th Ed.) — Dose: Ceftriaxone 1–2 g q24h + Metronidazole 500 mg q8h (adults) or weight-based for ${wt} • Route: IV/PO • Duration: perioperative / per surgical protocol.`
+          ],
+          secondLine: [
+            `Escalated Broad-Spectrum IV Antibiotics & Critical/Surgical Care if perforated or peritonitis — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per surgical protocol.`
+          ],
+          surgical: "Surgical Intervention (STG 4th Ed.): Urgent surgical evaluation for appendectomy or exploratory laparotomy as indicated.",
+          nutrition: "Keep NPO until surgical team clears oral intake.",
+          nonPharm: "Monitor vital signs, abdominal exam, and pain."
+        };
+      }
+
+      if (text.includes("hernia") || text.includes("obstruction") || text.includes("obstipation")) {
+        return {
+          diagnosis: `Specific Diagnosis (Surgical): Suspected Hernia / Intestinal Obstruction (${chosenDetails || symArr.join(", ") || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Abdominal distension, vomiting, failure to pass flatus/stool, or tender/irreducible hernia site.",
+          rationale: "IV fluid/electrolyte resuscitation, NPO/decompression as indicated, and urgent surgical evaluation for strangulation/obstruction follow STG 4th Ed.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate + Electrolyte Correction + Surgical Consultation — Dose: titrated to hydration/perfusion for ${wt} per STG 4th Ed. • Route: IV • Duration: resuscitation & perioperative.`
+          ],
+          secondLine: [
+            `Ceftriaxone + Metronidazole (per STG 4th Ed. if strangulation/ischemia/perforation suspected) + Surgical Care — Dose: Ceftriaxone 1–2 g q24h + Metronidazole 500 mg q8h (adults) or weight-based for ${wt} • Route: IV • Duration: per protocol.`
+          ],
+          surgical: "Surgical Intervention (STG 4th Ed.): Urgent surgery if strangulated/incarcerated hernia or mechanical bowel obstruction requires operative repair.",
+          nutrition: "Keep NPO with IV fluids until surgical evaluation and bowel function recovery.",
+          nonPharm: "Monitor vitals, distension, pain, and urine output closely."
+        };
+      }
+
+      if (text.includes("abscess") || text.includes("cellulitis") || text.includes("fluctuan")) {
+        return {
+          diagnosis: `Specific Diagnosis (Surgical): ${text.includes("abscess") || text.includes("fluctuan") ? "Abscess" : "Cellulitis / Soft Tissue Infection"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Localized erythema, warmth, swelling, tenderness, fluctuance, or systemic fever/toxicity.",
+          rationale: "Incision and drainage is primary for drainable abscess, while antistaphylococcal/streptococcal antibiotics treat cellulitis/spreading infection per STG 4th Ed.",
+          firstLine: [
+            `Cloxacillin (500 mg q6h adults or weight-based for ${wt}) or Amoxicillin-Clavulanate (625 mg q8h) (+ Incision & Drainage if fluctuant abscess per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO & Surgical Drainage • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Ceftriaxone (1–2 g q24h IV) or Clindamycin (300–450 mg q8h PO/IV for severe/spreading cellulitis or penicillin allergy per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: IV/PO • Duration: 5–10 days.`
+          ],
+          surgical: "Surgical Intervention (STG 4th Ed.): Incision and drainage of drainable abscess or debridement if necrotizing/deep infection is present.",
+          nutrition: "Adequate hydration and protein-rich diet.",
+          nonPharm: "Elevate affected limb if extremity cellulitis, keep wound clean/dressed, and monitor erythema borders."
+        };
+      }
+
+      if (text.includes("fracture") || text.includes("dislocation")) {
+        return {
+          diagnosis: `Specific Diagnosis (Surgical/Ortho): Suspected Fracture / Dislocation (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Pain, swelling, deformity, inability to bear weight/use limb, and distal neurovascular status.",
+          rationale: "Prompt analgesia, gentle immobilization/splinting, neurovascular checks, and orthopedic/surgical care prevent further injury per STG 4th Ed.",
+          firstLine: [
+            `Paracetamol (500 mg–1 g q6–8h PRN, max 4 g/day adults, or weight-based for ${wt}) + Splinting / Immobilization + Tetanus Toxoid (0.5 mL if open/contaminated wound per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO/IV/IM/Splint • Duration: acute immobilization & pain control.`
+          ],
+          secondLine: [
+            `Cefazolin / Amoxicillin-Clavulanate / Ceftriaxone (if open fracture per STG 4th Ed.) + Specialist Orthopedic Care — Dose: per STG 4th Ed. & ${wt} • Route: IV/PO • Duration: per open-fracture protocol.`
+          ],
+          surgical: "Surgical / Orthopedic Intervention (STG 4th Ed.): Urgent orthopedic/surgical care for open fractures, neurovascular compromise, or compartment syndrome.",
+          nutrition: "Balanced diet with protein, calcium, and hydration.",
+          nonPharm: "Check distal neurovascular status before and after splinting; elevate limb."
+        };
+      }
+
+      if (text.includes("bite") || text.includes("tetanus") || text.includes("trismus") || text.includes("snake") || text.includes("dog")) {
+        const isTetanus = text.includes("tetanus") || text.includes("trismus");
+        return {
+          diagnosis: `Specific Diagnosis (Surgical/Trauma): ${isTetanus ? "Suspected Tetanus" : "Animal / Snake Bite & Wound Care"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: isTetanus ? "Trismus, muscle spasms/rigidity, wound history, and tetanus immunization status." : "Bite wound depth/location, local swelling/necrosis, systemic envenomation, and rabies/tetanus status.",
+          rationale: "Wound care, Amoxicillin-Clavulanate, Tetanus/Rabies prophylaxis or Antivenom as indicated, and Metronidazole/spasm control (tetanus) follow STG 4th Ed.",
+          firstLine: [
+            isTetanus
+              ? `Metronidazole (500 mg q8h IV/PO adults or weight-based for ${wt}) + Tetanus Immune Globulin (TIG) / Tetanus Toxoid + Diazepam (for spasms per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: IV/PO/IM • Duration: 7–10 days (Metronidazole).`
+              : `Amoxicillin-Clavulanate (625 mg q8h PO adults or weight-based for ${wt}) + Tetanus Toxoid & Rabies PEP / Snake Antivenom (as indicated per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO/IM/ID/IV • Duration: 3–5d (prophylaxis) or 7–10d (infected).`
+          ],
+          secondLine: [
+            `Escalated IV Antibiotics / Antivenom / ICU Support for severe envenomation, sepsis, or refractory spasms per STG 4th Ed. — Dose: per STG 4th Ed. & ${wt} • Route: IV • Duration: per severity.`
+          ],
+          surgical: "Surgical Intervention (STG 4th Ed.): Thorough wound cleansing/debridement; avoid primary closure of contaminated/high-risk bite wounds unless clinically indicated per STG 4th Ed.",
+          nutrition: "Hydration and nutrition as safe.",
+          nonPharm: "Immediate soap-and-water wound washing for bites; quiet, low-stimulation care in tetanus."
+        };
+      }
+
+      if (text.includes("low bp") || text.includes("hypotension")) {
+        const hasAnemia = text.includes("anemia") || text.includes("low hb");
+        return {
+          diagnosis: `Specific Diagnosis (Medical): ${hasAnemia ? "Hypotension / Shock with Anemia" : "Hypotension / Perfusion Deficit"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Low BP, PR/RR/SpO2, Hb/CBC, bleeding/fluid loss, and perfusion/urine output.",
+          rationale: "Isotonic IV crystalloid resuscitation, treating underlying bleeding/dehydration/sepsis, and addressing anemia follow STG 4th Ed.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate + Etiology-Targeted STG 4th Ed. Therapy — Dose: titrated to BP & perfusion for ${wt} • Route: IV/PO • Duration: resuscitation & cause-specific.`
+          ],
+          secondLine: [
+            `Blood Transfusion (if severe anemia/hemorrhage per STG 4th Ed.) or Vasopressor Support (if fluid-refractory shock) — Dose: per STG 4th Ed. • Route: IV • Duration: emergency response.`
+          ],
+          surgical: "Surgical / Specialist Evaluation (STG 4th Ed.): Urgent surgical/obstetric review if bleeding or surgical source is suspected.",
+          nutrition: "IV fluids initially; iron-rich diet and fluids once stable.",
+          nonPharm: "Monitor BP, PR, RR, SpO2, and urine output closely."
+        };
+      }
+
+      if (text.includes("plasmodium falciparum") || text.includes("plasmodium vivax") || text.includes("mixed (p. falciparum") || text.includes("malaria")) {
+        const isVivax = text.includes("plasmodium vivax") && !text.includes("falciparum");
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Medical): ${isVivax ? "Plasmodium vivax Malaria" : "Malaria"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Fever/chills/rigors/headache, blood film/RDT species, RBG, Hb/CBC, and severe malaria danger signs.",
+          rationale: "Artemether-Lumefantrine (AL) is first-line for uncomplicated malaria (+ Primaquine per STG 4th Ed. where indicated/safe), while IV Artesunate treats severe malaria.",
+          firstLine: [
+            `Artemether-Lumefantrine (AL 20 mg/120 mg) — Dose: 6 doses over 3 days per weight/age band (e.g., 5–14 kg: 1 tab q12h; 15–24 kg: 2 tabs; 25–34 kg: 3 tabs; ≥35 kg/adults: 4 tabs q12h for ${wt}) • Route: PO (with food/milk) • Duration: 3 days.`,
+            isVivax || text.includes("vivax")
+              ? `Primaquine (for P. vivax radical cure per STG 4th Ed.) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: 14 days (avoid in pregnancy & check safety per STG 4th Ed.).`
+              : `Paracetamol (for fever/myalgia if needed) — Dose: 500 mg–1 g q6–8h PRN (max 4 g/day adults) or weight-based for ${wt} • Route: PO • Duration: until fever subsides.`
+          ],
+          secondLine: [
+            `Artesunate (for severe/complicated malaria or inability to take PO per STG 4th Ed.) — Dose: 2.4 mg/kg at 0, 12, and 24h then q24h (for ${wt}) • Route: IV or IM • Duration: ≥24h until able to tolerate oral AL.`
+          ],
+          surgical: "Surgical / Specialist Evaluation (STG 4th Ed.): ICU/specialist care for severe malaria complications; no primary surgery.",
+          nutrition: "Oral fluids and small frequent meals; check RBG if lethargic/febrile.",
+          nonPharm: "Use ITN bed nets, monitor Temp/RBG/Hb/GCS, and seek urgent care for danger signs."
+        };
+      }
+
+      if (hasRvsPositive || text.includes("hiv")) {
+        const hasRespInfection = text.includes("consolidation") || text.includes("pneumonia") || text.includes("infiltrate") || text.includes("shortness of breath") || text.includes("cough");
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Medical): ${hasRespInfection ? "Suspected Pneumonia / Lower Respiratory Infection + HIV / RVS Positive Evaluation" : "HIV / RVS Positive Clinical Evaluation"} (${chosenDetails || symArr.join(", ") || "Staging & OI screen"}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Assess respiratory status/SpO2/CXR/WBC for pneumonia or opportunistic infection alongside HIV WHO stage, CD4/viral load, and ART/CPT readiness.",
+          rationale: "Empiric pneumonia antibiotic therapy (when respiratory infection/consolidation is present) plus CPT and ART per STG 4th Ed. / national guidelines reduce morbidity and mortality.",
+          firstLine: hasRespInfection
+            ? [
+                `Amoxicillin-Clavulanate (625 mg–1 g q8–12h PO) or Ceftriaxone (1–2 g q24h IV/IM adults or weight-based for ${wt}, + Azithromycin when indicated per STG 4th Ed.) for respiratory infection/consolidation • Route: PO/IV/IM • Duration: 5–7 days.`,
+                `Cotrimoxazole Preventive Therapy (CPT) + First-Line ART (e.g., TDF/3TC/DTG per STG 4th Ed. / national protocol) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: lifelong/ongoing.`
+              ]
+            : [
+                `Cotrimoxazole Preventive Therapy (CPT) + First-Line ART (e.g., TDF/3TC/DTG per STG 4th Ed. / national protocol) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: lifelong/ongoing.`
+              ],
+          secondLine: [
+            `Escalated antimicrobials (if severe pneumonia/PCP/TB or OI per STG 4th Ed.) + Regimen adjustment / Specialist HIV Regimen — Dose: per STG 4th Ed. & ${wt} • Route: PO/IV • Duration: per protocol.`
+          ],
+          surgical: "Surgical / Specialist Evaluation (STG 4th Ed.): Refer if focal mass, abscess, complicated effusion, or surgical OI complication occurs.",
+          nutrition: "High-protein, high-energy diet, adequate fluids, safe water/hygiene, and micronutrient support.",
+          nonPharm: "Monitor SpO2, RR, PR, BP, and Temp; confidential counseling, adherence support, and regular monitoring."
+        };
+      }
+
+      if (text.includes("giardia lamblia") || text.includes("giardia")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / GI): Giardiasis (Giardia lamblia) (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Watery/greasy/foul stools, bloating, cramps, or Giardia trophozoites/cysts on stool exam.",
+          rationale: "Metronidazole (or Tinidazole) plus rehydration eradicates Giardia lamblia per STG 4th Ed.",
+          firstLine: [
+            `Metronidazole + Low-Osmolarity ORS — Dose: 250–500 mg q8h (adults) or weight-based for ${wt} per STG 4th Ed. • Route: PO • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Tinidazole — Dose: 2 g single dose (adults) or per STG 4th Ed. & ${wt} • Route: PO • Duration: single dose (or per STG 4th Ed.).`
+          ],
+          surgical: "Surgical Evaluation (STG 4th Ed.): None for uncomplicated giardiasis.",
+          nutrition: "Fluids and easily digestible meals.",
+          nonPharm: "Handwashing, safe/boiled water, and sanitation."
+        };
+      }
+
+      if (text.includes("entamoeba histolytica") || text.includes("amebiasis")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / GI): Intestinal Amebiasis (Entamoeba histolytica) (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Abdominal cramping/tenderness and bloody/mucoid stools or diarrhea with Entamoeba histolytica.",
+          rationale: "Metronidazole plus rehydration treats invasive trophozoites per STG 4th Ed.",
+          firstLine: [
+            `Metronidazole + Low-Osmolarity ORS / IV Crystalloid — Dose: 500–750 mg q8h (adults) or weight-based for ${wt} per STG 4th Ed. • Route: PO/IV • Duration: 7–10 days (plus luminal agent per STG when indicated).`
+          ],
+          secondLine: [
+            `Tinidazole or Luminal Agent per STG 4th Ed. — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: per protocol.`
+          ],
+          surgical: "Surgical Evaluation (STG 4th Ed.): Urgent surgical review if perforation or peritonitis occurs.",
+          nutrition: "Hydration and soft, easily digestible meals.",
+          nonPharm: "Handwashing, safe water, and urgent care for severe abdominal pain or high fever."
+        };
+      }
+
+      if (text.includes("dysenter") || text.includes("diarrhea") || text.includes("diarrhoea") || text.includes("age") || text.includes("stool")) {
+        const isDysentery = text.includes("dysenter") || text.includes("bloody") || text.includes("mucoid");
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / GI): ${isDysentery ? "Acute Dysentery" : "Acute Gastroenteritis (AGE) / Acute Diarrhea"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Stool character/frequency, dehydration status (Plan A/B/C), and fever.",
+          rationale: "ORS/IV fluids restore hydration and Zinc supports pediatric recovery; targeted antibiotic treats dysentery per STG 4th Ed.",
+          firstLine: [
+            `Low-Osmolarity ORS (per Plan A/B/C dehydration) + Zinc Sulfate (10 mg/day <6 months; 20 mg/day ≥6 months in children) — Dose: per dehydration status & ${wt} per STG 4th Ed. • Route: PO • Duration: until rehydrated (ORS) & 10–14 days (Zinc).`,
+            isDysentery
+              ? `Ciprofloxacin (500 mg q12h in non-pregnant adults per STG 4th Ed.) or Azithromycin per protocol — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: 3–5 days.`
+              : `Continue feeding & oral fluids as tolerated (avoid routine unnecessary antibiotics in uncomplicated watery AGE per STG 4th Ed.).`
+          ],
+          secondLine: [
+            `Azithromycin or Ceftriaxone (1–2 g q24h IV/IM adults or weight-based for ${wt}) per STG 4th Ed. — Dose: per STG 4th Ed. • Route: PO/IV/IM • Duration: 3–5 days.`
+          ],
+          surgical: "Surgical Evaluation (STG 4th Ed.): Urgent surgical review if severe abdominal pain or guarding/distension develops.",
+          nutrition: "Continue breastfeeding/small frequent meals and fluids as tolerated.",
+          nonPharm: "Handwashing, safe water, and monitor hydration/vitals."
+        };
+      }
+
+      if (text.includes("ketone") || text.includes("dka") || text.includes("fruity") || text.includes("hyperglycemia") || text.includes("diabet") || text.includes("polyuria") || text.includes("polydipsia")) {
+        const isDka = text.includes("ketone") || text.includes("dka") || text.includes("fruity");
+        return {
+          diagnosis: `Specific Diagnosis (Medical / Metabolic): ${isDka ? "Diabetic Ketoacidosis (DKA)" : "Diabetes Mellitus / Hyperglycemia"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "RBG/glucose, ketones, polyuria/polydipsia/weight loss/fruity breath, and hydration/acid-base/potassium status.",
+          rationale: "0.9% Sodium Chloride + Regular/Soluble Insulin (with potassium monitoring/replacement per protocol when ketones/DKA indicate) or Metformin per STG 4th Ed. prevents severe metabolic complications.",
+          firstLine: [
+            isDka
+              ? `0.9% Sodium Chloride (e.g., 1 L over 1h initial resuscitation in adults per protocol, adjusting for hydration/glucose <250 mg/dL) + Regular/Soluble Insulin (e.g., 0.1 IU/kg/hr IV infusion for ${wt} per STG/hospital DKA protocol, with K+ replacement guided by serum K+) • Route: IV • Duration: until ketoacidosis resolves.`
+              : `Metformin (start 500 mg once/twice daily with meals, titrating per STG 4th Ed. if uncomplicated Type 2 DM) or Insulin per STG 4th Ed. — Dose: per STG 4th Ed. & ${wt} • Route: PO/SC • Duration: ongoing.`
+          ],
+          secondLine: [
+            `Basal-Bolus Insulin / Sulfonylurea titration per STG 4th Ed. & glucose/ketone response — Dose: per STG 4th Ed. & ${wt} • Route: SC/PO • Duration: ongoing.`
+          ],
+          surgical: "Specialist / Critical Care Evaluation (STG 4th Ed.): Urgent inpatient/HDU/ICU care if DKA.",
+          nutrition: "Balanced low-sugar, high-fiber diabetic diet and hydration (NPO/IV fluids during acute DKA stabilization).",
+          nonPharm: "Monitor RBG, ketones, electrolytes, mental status, and hypoglycemia/DKA danger signs."
+        };
+      }
+
+      if (text.includes("uti") || text.includes("nitrites") || text.includes("leukocytes") || text.includes("dysuria") || text.includes("urinat") || text.includes("frequency")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Medical): Urinary Tract Infection / Urinary Frequency Evaluation (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Dysuria, frequency, urgency, flank pain/fever, and urinalysis or RBG.",
+          rationale: "Targeted antibacterial therapy per STG 4th Ed. resolves infection.",
+          firstLine: [
+            `Ciprofloxacin (500 mg q12h) or Nitrofurantoin (100 mg q12h) or Amoxicillin-Clavulanate (625 mg q8–12h) (per STG 4th Ed. & pregnancy/renal safety) — Dose: per STG 4th Ed. & ${wt} • Route: PO • Duration: 3–7d (uncomplicated) or 7–14d (pyelonephritis).`
+          ],
+          secondLine: [
+            `Ceftriaxone (1–2 g q24h adults or weight-based for ${wt}) or Escalated Regimen (if pyelonephritis/febrile UTI per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: IV/IM/PO • Duration: 7–14 days.`
+          ],
+          surgical: "Surgical / Urologic Evaluation (STG 4th Ed.): Refer if urinary obstruction or stone is suspected.",
+          nutrition: "Adequate oral fluids and balanced diet.",
+          nonPharm: "Complete full antibiotic course and seek urgent care if high fever or flank pain occurs."
+        };
+      }
+
+      if (text.includes("creatinine") || text.includes("urea") || text.includes("renal") || text.includes("kidney") || text.includes("oliguria")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical): Renal Impairment / AKI or CKD Evaluation (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Oliguria, edema, fluid/electrolyte status, and elevated Creatinine/Urea.",
+          rationale: "Reversible cause correction, stopping nephrotoxins, and renally adjusted dosing per STG 4th Ed. protect renal function.",
+          firstLine: [
+            `Fluid/Electrolyte Management + Nephrotoxin Avoidance + Renally Adjusted STG 4th Ed. Therapy — Dose: adjusted to renal function & ${wt} • Route: PO/IV • Duration: per renal course.`
+          ],
+          secondLine: [
+            `Nephrology / Specialist Care & Dialysis Evaluation per STG 4th Ed. — Dose: per specialist protocol • Route: IV/PO • Duration: per indication.`
+          ],
+          surgical: "Surgical / Urologic Evaluation (STG 4th Ed.): Urgent relief of urinary obstruction if present.",
+          nutrition: "Tailor fluid, sodium, and potassium intake to renal status per STG 4th Ed.",
+          nonPharm: "Strict intake/output chart, daily weight & BP checks, and avoid nephrotoxins."
+        };
+      }
+
+      if (text.includes("ast") || text.includes("alt") || text.includes("bilirubin") || text.includes("liver") || text.includes("hepatic") || text.includes("jaundice")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical): Hepatic Dysfunction / Acute Hepatitis or Jaundice (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Jaundice, RUQ discomfort, nausea/vomiting, and elevated AST/ALT/bilirubin.",
+          rationale: "Avoiding hepatotoxins, maintaining hydration/glucose, and treating underlying cause follow STG 4th Ed.",
+          firstLine: [
+            `Supportive Hepatic Care + Etiology-Targeted STG 4th Ed. Regimen — Dose: hepatically adjusted per STG 4th Ed. & ${wt} • Route: PO/IV • Duration: per cause.`
+          ],
+          secondLine: [
+            `Specialist Evaluation & Second-Line Regimen per STG 4th Ed. — Dose: per specialist guidance • Route: PO/IV • Duration: per protocol.`
+          ],
+          surgical: "Surgical Evaluation (STG 4th Ed.): Refer for biliary/surgical evaluation if obstruction is suspected.",
+          nutrition: "Adequate carbohydrates/calories and hydration; avoid alcohol/hepatotoxins.",
+          nonPharm: "Avoid alcohol & hepatotoxic drugs; monitor jaundice, mental status & bleeding."
+        };
+      }
+
+      if (text.includes("tsh") || text.includes("thyroid") || text.includes("goiter")) {
+        const isHypo = text.includes("high tsh") || text.includes("hypothyroid");
+        return {
+          diagnosis: `Specific Diagnosis (Medical): ${isHypo ? "Hypothyroidism" : text.includes("low tsh") || text.includes("hyperthyroid") ? "Hyperthyroidism" : "Thyroid Disorder Evaluation"} (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "TSH/T4/T3 correlated with hypothyroid or hyperthyroid signs.",
+          rationale: "Levothyroxine for hypothyroidism or antithyroid therapy for hyperthyroidism follows STG 4th Ed.",
+          firstLine: [
+            isHypo
+              ? `Levothyroxine — Dose: low starting dose titrated per STG 4th Ed. • Route: PO • Duration: lifelong/ongoing.`
+              : `Propylthiouracil or Methimazole/Carbimazole per STG 4th Ed. — Dose: per STG 4th Ed. • Route: PO • Duration: per endocrine protocol.`
+          ],
+          secondLine: [
+            `Dose titration or Endocrinology / Specialist Care per STG 4th Ed. — Dose: per TSH/T4 response • Route: PO • Duration: ongoing.`
+          ],
+          surgical: "Surgical / Endocrine Evaluation (STG 4th Ed.): Surgical/ENT consultation if compressive goiter or suspicious nodule.",
+          nutrition: "Balanced diet per STG 4th Ed.",
+          nonPharm: "Regular TSH/T4 follow-up and medication adherence."
+        };
+      }
+
+      if (text.includes("mtb") || text.includes("afb") || text.includes("tb") || text.includes("tuberculosis")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Medical): Suspected / Confirmed Tuberculosis (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Cough ≥2 weeks, fever, night sweats, weight loss, AFB/GeneXpert, and CXR.",
+          rationale: "Standardized anti-TB therapy per STG 4th Ed. / National TB Guidelines cures TB and prevents resistance.",
+          firstLine: [
+            `First-Line Anti-TB Regimen (2RHZE / 4RH per STG 4th Ed.) — Dose: weight-banded per ${wt} • Route: PO • Duration: full prescribed course.`
+          ],
+          secondLine: [
+            `DR-TB / Specialist TB Regimen per DST/GeneXpert & STG 4th Ed. — Dose: per protocol & ${wt} • Route: PO/IV • Duration: per protocol.`
+          ],
+          surgical: "Surgical / Thoracic Evaluation (STG 4th Ed.): Specialist review if massive hemoptysis or empyema.",
+          nutrition: "High-calorie, high-protein diet and adequate fluids.",
+          nonPharm: "Airborne infection control, cough hygiene, adherence support, and contact screening."
+        };
+      }
+
+      if (text.includes("copd")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical): COPD / Acute COPD Exacerbation (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Chronic dyspnea, cough/sputum, wheezing, and smoke/biomass exposure.",
+          rationale: "Bronchodilators and short-course systemic corticosteroids per STG 4th Ed. relieve airway obstruction.",
+          firstLine: [
+            `Salbutamol (Inhaler/Nebulizer) + Prednisolone (40 mg once daily for 5 days per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: Inhalation / PO • Duration: 5 days (Prednisolone).`
+          ],
+          secondLine: [
+            `Amoxicillin-Clavulanate or Doxycycline (if bacterial exacerbation per STG 4th Ed.) + Maintenance therapy — Dose: per STG 4th Ed. • Route: PO / Inhalation • Duration: 5–7 days / ongoing.`
+          ],
+          surgical: "Specialist Evaluation (STG 4th Ed.): Urgent hospital care if severe respiratory distress.",
+          nutrition: "Small frequent high-calorie meals and adequate hydration.",
+          nonPharm: "Smoking/biomass cessation and controlled oxygen if hypoxic."
+        };
+      }
+
+      if (text.includes("stroke") || text.includes("hemiparesis") || text.includes("ischemic infarct") || text.includes("hemorrhagic lesion")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical): Acute Stroke (${text.includes("hemorrhagic") ? "Hemorrhagic" : text.includes("ischemic") ? "Ischemic" : "Acute Neurovascular Evaluation"}) (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Sudden focal neurologic deficit, RBG check, BP, and Brain CT before antithrombotic therapy.",
+          rationale: "Supportive stabilization, glucose control, and Brain CT-guided therapy follow STG 4th Ed.",
+          firstLine: [
+            `Oxygen (if hypoxic) + Aspirin (150–300 mg loading then 75–100 mg daily for ischemic stroke AFTER Brain CT excludes hemorrhage per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO/PR • Duration: acute & secondary prevention.`
+          ],
+          secondLine: [
+            `Clopidogrel / Atorvastatin secondary prevention & specialist stroke care per STG 4th Ed. — Dose: per STG 4th Ed. • Route: PO • Duration: ongoing.`
+          ],
+          surgical: "Neurosurgical Evaluation (STG 4th Ed.): Urgent neurosurgical review if large hemorrhage with mass effect.",
+          nutrition: "Swallow screen before oral feeding; NPO/NG tube if dysphagia.",
+          nonPharm: "Head elevation as indicated, airway/GCS/BP monitoring, and rehabilitation."
+        };
+      }
+
+      if (text.includes("chest pain") || text.includes("acs") || text.includes("st-segment")) {
+        return {
+          diagnosis: `Specific Diagnosis (Medical): Acute Coronary Syndrome / Ischemic Chest Pain (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Ischemic chest pain, sweating/dyspnea, ECG changes, and cardiac biomarkers.",
+          rationale: "Immediate Aspirin, anti-ischemic relief, and urgent cardiology/reperfusion care per STG 4th Ed.",
+          firstLine: [
+            `Aspirin (chewed 162–325 mg loading, then 75–100 mg daily) + Nitroglycerin (if BP permits & indicated per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO / SL • Duration: acute & ongoing.`
+          ],
+          secondLine: [
+            `Clopidogrel + Anticoagulation / Beta-blocker / Statin per STG 4th Ed. — Dose: per STG 4th Ed. & ${wt} • Route: PO/SC/IV • Duration: per protocol.`
+          ],
+          surgical: "Cardiology / Reperfusion Evaluation (STG 4th Ed.): Urgent transfer for reperfusion/cardiology care.",
+          nutrition: "Light heart-healthy diet once stable.",
+          nonPharm: "Rest, ECG/BP/SpO2 monitoring, and emergency care."
+        };
+      }
+
+      if (text.includes("sepsis") || text.includes("shock")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Medical): Sepsis / Septic Shock (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Suspected infection with hypotension/hypoperfusion, fever/hypothermia, tachycardia, or tachypnea.",
+          rationale: "Rapid IV crystalloid resuscitation, early broad-spectrum IV antibiotics, and source control follow STG 4th Ed.",
+          firstLine: [
+            `0.9% Sodium Chloride / Ringer's Lactate bolus + Ceftriaxone (1–2 g q24h adults or weight-based for ${wt} per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: IV • Duration: resuscitation & 7–14 days.`
+          ],
+          secondLine: [
+            `Vasopressor support & escalated/targeted IV antibiotics per STG 4th Ed. — Dose: titrated per STG 4th Ed. & ${wt} • Route: IV • Duration: until shock resolution.`
+          ],
+          surgical: "Source Control / Surgical Evaluation (STG 4th Ed.): Urgent drainage or debridement of infected source if indicated.",
+          nutrition: "Check RBG; support IV fluids/nutrition per stability.",
+          nonPharm: "Close BP, PR, RR, Temp, SpO2, GCS, and urine output monitoring."
+        };
+      }
+
+      if (text.includes("cough") || text.includes("shortness of breath") || text.includes("pneumonia") || text.includes("infiltrate") || text.includes("consolidation")) {
+        return {
+          diagnosis: `Specific Diagnosis (Infectious / Medical): Pneumonia / Lower Respiratory Infection (${chosenDetails || ccText}) (${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+          clues: "Cough, sputum, shortness of breath/tachypnea, fever, pleuritic pain, vitals/SpO2, and CXR/CBC.",
+          rationale: "Amoxicillin or Doxycycline first-line (outpatient/non-severe); Amoxicillin-clavulanate or Ceftriaxone (+ Macrolide when indicated) for severe/inpatient per STG 4th Ed.",
+          firstLine: [
+            `Amoxicillin (500 mg–1 g q8h adults or weight-based for ${wt}) or Doxycycline (100 mg q12h if non-pregnant adult per STG 4th Ed.) — Dose: per STG 4th Ed. • Route: PO • Duration: 5–7 days.`
+          ],
+          secondLine: [
+            `Amoxicillin-clavulanate (625 mg–1 g q8–12h PO) or Ceftriaxone (1–2 g q24h IV/IM adults or weight-based for ${wt}, + Azithromycin when indicated per STG 4th Ed.) • Route: PO/IV/IM • Duration: 5–7 days.`
+          ],
+          surgical: "Thoracic / Specialist Evaluation (STG 4th Ed.): Chest tube/drainage if complicated pleural effusion/empyema.",
+          nutrition: "Adequate fluids and balanced meals.",
+          nonPharm: "Monitor SpO2, RR, BP, PR, and Temp; seek urgent care if worsening."
+        };
+      }
+
+      if (wardKey === "psychiatry") {
+        return {
+          diagnosis: `Specific Diagnosis (Psychiatry): ${symArr.join(", ") || ccText} (${chosenDetails || cleanDur || "Clinical Evaluation"}) (STG 4th Ed.)`,
+          clues: "Exclude medical/substance causes, assess safety/self-harm risk, and identify psychiatric features.",
+          rationale: "Safe supportive care plus STG 4th Ed. psychotropic/withdrawal regimens stabilize symptoms.",
+          firstLine: [
+            `Targeted STG 4th Ed. Psychotropic / Withdrawal Regimen — Dose: low-dose initiated & titrated per STG 4th Ed. & ${wt} • Route: PO/IM • Duration: per protocol.`
+          ],
+          secondLine: [
+            `Alternative psychotropic agent per STG 4th Ed. tolerance & response — Dose: per STG 4th Ed. • Route: PO • Duration: maintenance.`
+          ],
+          surgical: "Medical / Safety Evaluation (STG 4th Ed.): Urgent medical workup if delirium/medical mimic is suspected.",
+          nutrition: "Regular meals, hydration, and Thiamine if indicated.",
+          nonPharm: "Safety planning, family psychoeducation, and supportive care."
+        };
+      }
+
+      if (wardKey === "palliative") {
+        return {
+          diagnosis: `Specific Diagnosis (Palliative Ch. 20): ${symArr.join(", ") || ccText} (${chosenDetails || cleanDur || "Palliative Care"}) (STG 4th Ed. Ch. 20)`,
+          clues: "Assess pain, dyspnea, GI/urinary/skin symptoms, delirium, and psychosocial/spiritual needs.",
+          rationale: "Stepwise STG 4th Ed. Ch. 20 symptom control and holistic family/spiritual care prioritize comfort and dignity.",
+          firstLine: [
+            `Stepwise STG 4th Ed. Ch. 20 Symptom Regimen — Dose: titrated to comfort per STG 4th Ed. & ${wt} • Route: PO/SC/IV • Duration: ongoing.`
+          ],
+          secondLine: [
+            `Dose adjustment or alternative Ch. 20 agent for refractory symptoms — Dose: per STG 4th Ed. Ch. 20 • Route: PO/SC/IV • Duration: ongoing.`
+          ],
+          surgical: "Comfort Procedure (STG 4th Ed. Ch. 20): Consider comfort intervention only if aligned with care goals.",
+          nutrition: "Small appetizing foods/fluids as desired without forcing.",
+          nonPharm: "Comfort care, positioning, family support, and spiritual care."
+        };
+      }
+
+      return {
+        diagnosis: `Specific Diagnosis: ${ccText} (${chosenDetails || symArr.join(", ") || "Clinical Evaluation"}) ${patientTag ? `[${patientTag}] ` : ""}(${cleanDur || "Duration not specified"}) (STG 4th Ed.)`,
+        clues: "Correlate chief complaint, duration, vital signs, characterizing symptoms, and selected investigation findings per STG 4th Edition.",
+        rationale: "Evidence-based stabilization and targeted STG 4th Edition therapy tailored to clinical presentation and investigation findings.",
+        firstLine: [
+          `Initiate appropriate first-line STG 4th Edition therapy — Dose: per STG 4th Ed. & ${wt} • Route: PO/IV as indicated • Duration: per confirmed diagnosis.`
+        ],
+        secondLine: [
+          `Escalate to second-line STG 4th Edition regimen if needed — Dose: per STG 4th Ed. • Route: per severity • Duration: per protocol.`
+        ],
+        surgical: "Evaluate for surgical/specialist indication if acute surgical signs or complications are present per STG 4th Ed.",
+        nutrition: "Maintain hydration and balanced nutrition appropriate to tolerance.",
+        nonPharm: "Monitor vitals and symptoms closely; seek prompt medical care if red flags develop."
+      };
+    }
+
+    function goStep2() {
+      try {
+        const ccEl = document.getElementById("cc");
+        const cc = ccEl ? ccEl.value.trim() : "";
+        if (!cc) {
+          alert("እባክዎ Chief Complaint ያስገቡ።");
+          return;
+        }
+        state.cc = cc;
+        state.ccDuration = formatDurationClean((document.getElementById("ccDuration")?.value || "").trim());
+        state.demographics = {
+          age: (document.getElementById("age")?.value || "").trim() || null,
+          weight: (document.getElementById("weight")?.value || "").trim() || null,
+          sex: document.getElementById("sex")?.value || null,
+          ward: document.getElementById("ward")?.value || null
+        };
+        state.vitals = {
+          bp: (document.getElementById("bp")?.value || "").trim(),
+          pr: (document.getElementById("pr")?.value || "").trim(),
+          rr: (document.getElementById("rr")?.value || "").trim(),
+          temp: (document.getElementById("temp")?.value || "").trim(),
+          spo2: (document.getElementById("spo2")?.value || "").trim()
+        };
+
+        const wardKey = state.demographics?.ward || "medical";
+        const durSuffix = state.ccDuration ? ` (${state.ccDuration})` : "";
+        const banner = document.getElementById("ccContextBanner");
+        if (banner) {
+          banner.textContent = `Chief Complaint${durSuffix}: "${state.cc}" — ከዚህ በታች ህመሙን የሚለዩ (Characterize የሚያደርጉ) ምልክቶች ተመንጭተዋል፦`;
+        }
+
+        const dynamicSyms = generateCharacterizingSymptoms(state.cc, wardKey, state.vitals);
+        const wrap = document.getElementById("symptomChips");
+        if (wrap) {
+          wrap.innerHTML = "";
+          dynamicSyms.forEach(sym => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.className = "chip" + (state.symptoms.has(sym) ? " active" : "");
+            b.textContent = sym;
+            b.onclick = () => {
+              if (state.symptoms.has(sym)) state.symptoms.delete(sym);
+              else state.symptoms.add(sym);
+              b.classList.toggle("active");
+            };
+            wrap.appendChild(b);
+          });
+        }
+        showStep("step2");
+      } catch (err) {
+        alert("Step 2 ስህተት: " + (err?.message || err));
+      }
+    }
+
+    function renderStep3Investigations() {
+      const wardKey = state.demographics?.ward || "medical";
+      const symArr = [...state.symptoms];
+      const relevantInvestigations = generateRelevantInvestigations(state.cc, wardKey, symArr);
+
+      const invBanner = document.getElementById("invContextBanner");
+      if (invBanner) {
+        invBanner.textContent = `Chief Complaint: "${state.cc}" • Selected Symptoms: ${symArr.join(", ") || "None"}`;
+      }
+
+      const box = document.getElementById("investigationList");
+      if (box) {
+        box.innerHTML = "";
+        relevantInvestigations.forEach(inv => {
+          state.invResults[inv.id] = getSelectedInvArray(inv.id);
+          if (!state.invCustomNotes[inv.id]) state.invCustomNotes[inv.id] = "";
+
+          const card = document.createElement("div");
+          card.className = "card";
+          card.innerHTML = `<h3>${inv.name}</h3>`;
+
+          const chips = document.createElement("div");
+          chips.className = "chips";
+
+          const syncChipStates = () => {
+            const current = getSelectedInvArray(inv.id);
+            chips.querySelectorAll(".chip").forEach(btn => {
+              const label = btn.dataset.opt;
+              btn.classList.toggle("active", current.includes(label));
+            });
+          };
+
+          inv.options.forEach(opt => {
+            const b = document.createElement("button");
+            b.type = "button";
+            b.dataset.opt = opt;
+            const currentArr = getSelectedInvArray(inv.id);
+            b.className = "chip" + (currentArr.includes(opt) ? " active" : "");
+            b.textContent = opt;
+            b.onclick = () => {
+              let arr = [...getSelectedInvArray(inv.id)];
+              if (opt === "None") {
+                arr = ["None"];
+              } else {
+                arr = arr.filter(x => x !== "None");
+                if (arr.includes(opt)) {
+                  arr = arr.filter(x => x !== opt);
+                } else {
+                  arr.push(opt);
+                }
+                if (!arr.length) arr = ["None"];
+              }
+              state.invResults[inv.id] = arr;
+              syncChipStates();
+            };
+            chips.appendChild(b);
+          });
+
+          const noteLabel = document.createElement("label");
+          noteLabel.setAttribute("for", `invCustom_${inv.id}`);
+          noteLabel.textContent = "የራስዎን ውጤት / ቁጥር ማስገቢያ (Blank Space)";
+
+          const noteInput = document.createElement("input");
+          noteInput.id = `invCustom_${inv.id}`;
+          noteInput.type = "text";
+          noteInput.placeholder = inv.placeholder || "Enter result / numeric value...";
+          noteInput.value = state.invCustomNotes[inv.id] || "";
+          noteInput.oninput = () => {
+            state.invCustomNotes[inv.id] = noteInput.value;
+          };
+
+          card.appendChild(chips);
+          card.appendChild(noteLabel);
+          card.appendChild(noteInput);
+          box.appendChild(card);
+        });
+      }
+
+      const shownIds = new Set(relevantInvestigations.map(i => i.id));
+      const selectEl = document.getElementById("extraInvSelect");
+      if (selectEl) {
+        selectEl.innerHTML = `<option value="">-- Select additional single investigation --</option>`;
+        ALL_SINGLE_INVESTIGATIONS.filter(i => !shownIds.has(i.id)).forEach(i => {
+          const op = document.createElement("option");
+          op.value = i.id;
+          op.textContent = i.name;
+          selectEl.appendChild(op);
+        });
+      }
+    }
+
+    function addExtraInvestigation() {
+      const selectEl = document.getElementById("extraInvSelect");
+      const chosenId = selectEl ? selectEl.value : "";
+      if (!chosenId) return;
+      state.extraInvIds.add(chosenId);
+      renderStep3Investigations();
+    }
+
+    function goStep3() {
+      renderStep3Investigations();
+      showStep("step3");
+    }
+
+    function goStep4() {
+      if (!state.caseCountedThisRun) {
+        casesCompleted += 1;
+        state.caseCountedThisRun = true;
+        try {
+          localStorage.setItem(USAGE_KEY, String(casesCompleted));
+        } catch (e) {}
+        renderUsageUI();
+      }
+
+      const cleanDur = formatDurationClean(state.ccDuration);
+      const wardKey = state.demographics?.ward || "medical";
+      const symArr = [...state.symptoms];
+      const symList = symArr.join(", ") || "None selected";
+      const investigations = generateRelevantInvestigations(state.cc, wardKey, symArr);
+      const activeInvList = investigations.map(inv => {
+        const selArr = getSelectedInvArray(inv.id).filter(x => x && x !== "None");
+        const custom = (state.invCustomNotes[inv.id] || "").trim();
+        if (!selArr.length && !custom) return null;
+        const selText = selArr.join(", ");
+        if (selText && custom) return `${inv.name}: ${selText} (${custom})`;
+        if (selText) return `${inv.name}: ${selText}`;
+        return `${inv.name}: ${custom}`;
+      }).filter(Boolean);
+      const invSummary = activeInvList.join(" | ") || "None";
+
+      const plan = buildClinicalPlan(wardKey, state.cc, cleanDur, symArr, state.invResults, state.invCustomNotes, state.demographics, state.vitals);
+      const combinedText = `${state.cc} ${cleanDur} ${symArr.join(" ")} ${flattenInvText(state.invResults)} ${Object.values(state.invCustomNotes).join(" ")}`.toLowerCase();
+      const alerts = buildSafetyAlerts(state.vitals, state.demographics, combinedText);
+      const alertHtml = alerts.length
+        ? `<div class="alert-box"><strong>Clinical Safety & Danger Signs Alerts:</strong><ul>${alerts.map(a => `<li>${a}</li>`).join("")}</ul></div>`
+        : "";
+      const teachHtml = `<div class="teach-box"><strong>Teaching — Key Clinical Clues:</strong> ${plan.clues}<br/><strong>STG 4th Ed. Evidence & Treatment Rationale:</strong> ${plan.rationale}</div>`;
+      const customNote = customWardUpdates[wardKey]
+        ? `<p><strong>Saved Owner STG Note (${customWardUpdates[wardKey].title}):</strong> ${customWardUpdates[wardKey].note}</p>`
+        : "";
+      const bpText = state.vitals?.bp ? ` • <strong>BP:</strong> ${state.vitals.bp}` : "";
+      const durText = cleanDur ? ` (${cleanDur})` : "";
+      const copyMsgEl = document.getElementById("copyStatusMsg");
+      if (copyMsgEl) copyMsgEl.textContent = "";
+
+      const summaryEl = document.getElementById("finalSummary");
+      if (summaryEl) {
+        summaryEl.innerHTML = `
+          ${alertHtml}
+          <h3>Diagnosis</h3>
+          <p><strong>${plan.diagnosis}</strong></p>
+          <p><strong>Chief Complaint:</strong> ${state.cc}${durText}</p>
+          <p><strong>Ward:</strong> ${wardKey}${bpText} • <strong>Characterizing Symptoms:</strong> ${symList}</p>
+          <p><strong>Selected Investigations & Results:</strong> ${invSummary}</p>
+          ${teachHtml}
+          ${customNote}
+
+          <h3>First-Line Pharmacological Treatment (Drug • Dose • Route • Duration)</h3>
+          <ul>${plan.firstLine.map(x => `<li>${x}</li>`).join("")}</ul>
+
+          <h3>Second-Line Pharmacological Treatment (Drug • Dose • Route • Duration)</h3>
+          <ul>${plan.secondLine.map(x => `<li>${x}</li>`).join("")}</ul>
+
+          <h3>Surgical / Palliative / Obstetric Intervention (STG 4th Ed.)</h3>
+          <ul><li>${plan.surgical}</li></ul>
+
+          <h3>Nutritional Recommendations</h3>
+          <ul><li>${plan.nutrition}</li></ul>
+
+          <h3>Non-Pharmacological / Psychosocial / Spiritual Care</h3>
+          <ul><li>${plan.nonPharm}</li></ul>
+
+          <p class="note-warn">Educational & clinical decision support grounded in Ethiopian STG 4th Edition principles; always confirm exact STG 4th Ed. tables, patient weight/age/pregnancy, allergies, and clinical judgment.</p>
+        `;
+      }
+      showStep("step4");
+    }
+
+    function copySummaryText() {
+      const el = document.getElementById("finalSummary");
+      const statusEl = document.getElementById("copyStatusMsg");
+      if (!el) return;
+      const text = el.innerText.trim();
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(() => {
+          if (statusEl) statusEl.textContent = "Clinical summary copied to clipboard.";
+        }).catch(() => {
+          fallbackCopy(text, statusEl);
+        });
+      } else {
+        fallbackCopy(text, statusEl);
+      }
+    }
+
+    function fallbackCopy(text, statusEl) {
+      try {
+        const ta = document.createElement("textarea");
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        document.body.removeChild(ta);
+        if (statusEl) statusEl.textContent = "Clinical summary copied.";
+      } catch (e) {
+        if (statusEl) statusEl.textContent = "Unable to auto-copy on this browser; you can select and copy text manually.";
+      }
+    }
+
+    function resetApp() {
+      state.symptoms.clear();
+      state.invResults = {};
+      state.invCustomNotes = {};
+      state.extraInvIds.clear();
+      state.ccDuration = "";
+      state.caseCountedThisRun = false;
+      if (document.getElementById("cc")) document.getElementById("cc").value = "";
+      if (document.getElementById("ccDuration")) document.getElementById("ccDuration").value = "";
+      const copyMsgEl = document.getElementById("copyStatusMsg");
+      if (copyMsgEl) copyMsgEl.textContent = "";
+      showStep("step1");
+    }
+
+    function selectPlan(planName) {
+      document.getElementById("planStatus").textContent =
+        `Selected: ${planName}. Connect backend /api/subscriptions/checkout and /api/usage/consume with Chapa/Telebirr to process live payments and usage metering.`;
+    }
+
+    function unlockOwnerPanel() {
+      const entered = (document.getElementById("ownerPinInput")?.value || "").trim();
+      const msgEl = document.getElementById("ownerLockMsg");
+      if (entered === ownerPin) {
+        document.getElementById("ownerLockSection").style.display = "none";
+        document.getElementById("ownerEditorSection").style.display = "block";
+        if (msgEl) msgEl.textContent = "";
+      } else if (msgEl) {
+        msgEl.textContent = "Invalid Owner PIN.";
+      }
+    }
+
+    function lockOwnerPanel() {
+      document.getElementById("ownerEditorSection").style.display = "none";
+      document.getElementById("ownerLockSection").style.display = "block";
+      if (document.getElementById("ownerPinInput")) document.getElementById("ownerPinInput").value = "";
+    }
+
+    function changeOwnerPin() {
+      const nextPin = (document.getElementById("newOwnerPin")?.value || "").trim();
+      if (!nextPin || nextPin.length < 4) {
+        document.getElementById("adminMsg").textContent = "Please enter a new Owner PIN of at least 4 characters.";
+        return;
+      }
+      ownerPin = nextPin;
+      try {
+        localStorage.setItem(PIN_KEY, ownerPin);
+      } catch (e) {}
+      document.getElementById("newOwnerPin").value = "";
+      document.getElementById("adminMsg").textContent = "Owner PIN updated successfully.";
+    }
+
+    function saveAdminStg() {
+      const ward = document.getElementById("admWard").value;
+      const title = document.getElementById("admTitle").value.trim();
+      const note = document.getElementById("admNote").value.trim();
+      if (!title || !note) {
+        document.getElementById("adminMsg").textContent = "Please enter both Title and STG update note.";
+        return;
+      }
+      customWardUpdates[ward] = { title, note };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(customWardUpdates));
+      } catch (e) {}
+      document.getElementById("adminMsg").textContent = `Saved ${ward} STG 4th Ed. update ("${title}") and formatted release snippet.`;
+
+      const snippet = JSON.stringify({
+        guideline: "Ethiopian STG 4th Edition",
+        ward,
+        title,
+        note,
+        updatedAt: new Date().toISOString()
+      }, null, 2);
+      document.getElementById("updateExportSnippet").textContent = snippet;
+    }
+
+    renderUsageUI();
+  </script>
+</body>
+</html>
